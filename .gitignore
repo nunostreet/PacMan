@@ -1,1 +1,4 @@
 mazegenerator-00001-py3-none-any.whl
+
+venv
+.mypy_cache
