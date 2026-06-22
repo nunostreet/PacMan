@@ -8,8 +8,6 @@ mg = MazeGenerator(
 )
 mg.generate()
 
-print(mg.maze)
-# Não vão ser usados
-print(mg.maze_entry)
-print(mg.maze_exit)
-print(mg.shortest_path)
+for row in mg.maze:
+    print(row)
+print(len(mg.maze))
