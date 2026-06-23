@@ -83,6 +83,7 @@ class GameSnapshot:
     pacman_pos: tuple[int, int]
     ghosts: list[GhostState]
     pacgums: list[list[int]]
+    maze: list[list[int]]
     score: int
     lives: int
     level: int

@@ -13,6 +13,7 @@ class MazeLoader:
     def __init__(self) -> None:
         self.neighbors: dict[tuple[int, int], list[tuple[int, int]]] = {}
         self.pacgums: list[list[int]] = []
+        self.maze_grid: list[list[int]] = []
         self.width: int = 0
         self.height: int = 0
         self._rng = random.Random()
@@ -41,6 +42,7 @@ class MazeLoader:
 
             self.width = width
             self.height = height
+            self.maze_grid = maze_grid
             self.neighbors = self._build_neighbors(maze_grid)
             self.pacgums = self._gen_pacgums(maze_grid, pacgum_count)
 
