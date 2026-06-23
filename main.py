@@ -1,13 +1,19 @@
 from mazegenerator import MazeGenerator  # type: ignore[import-untyped]
 
 
-mg = MazeGenerator(
-    size=(15, 15),   # tamanho do labirinto (colunas, linhas)
-    perfect=True,    # labirinto "perfeito" (sem ciclos, solução única)
-    seed=42          # seed para reproduzir o mesmo labirinto
-)
-mg.generate()
+class MazeLoader:
 
-for row in mg.maze:
-    print(row)
-print(len(mg.maze))
+    def load(self, width: int, height: int, seed: int):
+
+        try:
+            mg = MazeGenerator(
+                size=(width, height),
+                perfect=False,
+                seed=seed
+            )
+        except Exception as e:
+            print(f"Maze generation failed: {e}")
+
+        maze_grid = mg.maze
+
+        return maze_grid
