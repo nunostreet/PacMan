@@ -73,6 +73,7 @@ class GameSnapshot:
         pacman_pos: Posição do Pacman (x, y).
         ghosts: Lista com o estado de cada fantasma.
         pacgums: Grelha com 0 (vazio), 1 (pacgum) ou 2 (super-pacgum).
+        maze: Grelha de bitmask do labirinto (N=1, E=2, S=4, W=8) para a UI desenhar paredes.
         score: Pontuação atual.
         lives: Vidas restantes.
         level: Nível atual (começa em 1).
