@@ -38,31 +38,38 @@ class GhostState:
 
 @dataclass
 class GameConfig:
-    """Configuração de um nível carregada do config.json.
+    """Configuração do jogo carregada do config.json.
 
     Attributes:
-        width: Largura do labirinto.
-        height: Altura do labirinto.
+        levels: Lista de tamanhos de labirinto por nível [(width, height), ...].
         lives: Número de vidas iniciais.
         pacgum_count: Número de pacgums por nível.
         points_per_pacgum: Pontos por pacgum comido.
         points_per_super_pacgum: Pontos por super-pacgum comido.
         points_per_ghost: Pontos por fantasma comido.
+        ghost_respawn_time: Segundos até um fantasma comido reaparecer.
         level_max_time: Tempo máximo por nível em segundos.
-        seed: Seed do labirinto (42 no nível 1, 0 nos seguintes).
+        seed: Seed do labirinto do nível 1 (níveis seguintes usam seed=0).
         highscore_filename: Caminho para o ficheiro de highscores.
     """
 
-    width: int = 15
-    height: int = 15
+    levels: list[tuple[int, int]] = None  # type: ignore[assignment]
     lives: int = 3
     pacgum_count: int = 42
     points_per_pacgum: int = 10
     points_per_super_pacgum: int = 50
     points_per_ghost: int = 200
+    ghost_respawn_time: float = 5.0
     level_max_time: int = 90
     seed: int = 42
     highscore_filename: str = "highscores.json"
+
+    def __post_init__(self) -> None:
+        """Define o valor por defeito de levels se não foi fornecido."""
+        if self.levels is None:
+            self.levels = [(15, 11), (17, 13), (19, 15), (21, 15),
+                           (23, 17), (25, 17), (25, 19), (27, 19),
+                           (29, 21), (31, 21)]
 
 
 @dataclass
