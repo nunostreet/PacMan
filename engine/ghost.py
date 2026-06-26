@@ -1,3 +1,6 @@
+from collections import deque
+
+
 class Ghost:
     """Representa um fantasma no jogo.
 
@@ -42,7 +45,6 @@ class Ghost:
         options = neighbors[(self.x, self.y)]
         if not options:
             return
-        get_close = options[0]
         move_away = options[0]
         for neighbor in options:
             distance = (
@@ -51,7 +53,6 @@ class Ghost:
             )
             if distance < best_dist:
                 best_dist = distance
-                get_close = neighbor
             if distance > worst_dist:
                 worst_dist = distance
                 move_away = neighbor
@@ -59,7 +60,9 @@ class Ghost:
         if self.edible:
             self.x, self.y = move_away
         else:
-            self.x, self.y = get_close
+            next_pos = self._bfs_next(neighbors, pacman_pos)
+            if next_pos:
+                self.x, self.y = next_pos
 
     def respawn(self, timer: float) -> None:
         """Marca o fantasma como comido e arranca o timer de respawn.
@@ -81,3 +84,34 @@ class Ghost:
             if self.respawn_timer <= 0:
                 self.x = self.start_x
                 self.y = self.start_y
+
+    def _bfs_next(
+            self,
+            neighbors: dict[tuple[int, int], list[tuple[int, int]]],
+            pacman_pos: tuple[int, int]
+            ) -> tuple[int, int] | None:
+        """Encontra o próximo passo do caminho mais curto até ao Pacman via BFS
+
+        Args:
+            neighbors: Lista de adjacência do labirinto.
+            pacman_pos: Posição atual do Pacman (x, y).
+
+        Returns:
+            Primeiro passo do caminho mais curto, ou None se não houver caminho
+        """
+        queue: deque[tuple[int, int, tuple[int, int] | None]] = deque(
+            [(self.x, self.y, None)]
+        )
+        visited = {(self.x, self.y)}
+        while queue:
+            x, y, first = queue.popleft()
+            for nx, ny in neighbors[(x, y)]:
+                if (nx, ny) == pacman_pos:
+                    return first if first is not None else (nx, ny)
+                if (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    next_first: tuple[int, int] | None = (
+                        first if first is not None else (nx, ny)
+                    )
+                    queue.append((nx, ny, next_first))
+        return None

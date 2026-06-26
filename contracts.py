@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 
@@ -29,11 +29,13 @@ class GhostState:
         x: Posição horizontal.
         y: Posição vertical.
         edible: True se o fantasma pode ser comido.
+        active: False quando está em respawn (UI não deve desenhar).
     """
 
     x: int
     y: int
     edible: bool = False
+    active: bool = True
 
 
 @dataclass
@@ -53,7 +55,10 @@ class GameConfig:
         highscore_filename: Caminho para o ficheiro de highscores.
     """
 
-    levels: list[tuple[int, int]] = None  # type: ignore[assignment]
+    levels: list[tuple[int, int]] = field(default_factory=lambda: [
+        (15, 11), (17, 13), (19, 15), (21, 15), (23, 17),
+        (25, 17), (25, 19), (27, 19), (29, 21), (31, 21)
+    ])
     lives: int = 3
     pacgum_count: int = 42
     points_per_pacgum: int = 10
@@ -63,13 +68,6 @@ class GameConfig:
     level_max_time: int = 90
     seed: int = 42
     highscore_filename: str = "highscores.json"
-
-    def __post_init__(self) -> None:
-        """Define o valor por defeito de levels se não foi fornecido."""
-        if self.levels is None:
-            self.levels = [(15, 11), (17, 13), (19, 15), (21, 15),
-                           (23, 17), (25, 17), (25, 19), (27, 19),
-                           (29, 21), (31, 21)]
 
 
 @dataclass
@@ -86,6 +84,7 @@ class GameSnapshot:
         lives: Vidas restantes.
         level: Nível atual (começa em 1).
         time_remaining: Segundos restantes no nível.
+        level_max_time: Tempo máximo do nível em segundos (para a barra de HUD).
         status: Estado atual do jogo.
     """
 
@@ -97,4 +96,8 @@ class GameSnapshot:
     lives: int
     level: int
     time_remaining: float
+    level_max_time: float
     status: GameStatus
+
+
+from engine.game import PacmanGame  # noqa: E402
