@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Protocol
 
 
 class Direction(Enum):
@@ -43,7 +44,7 @@ class GameConfig:
     """Configuração do jogo carregada do config.json.
 
     Attributes:
-        levels: Lista de tamanhos de labirinto por nível [(width, height), ...].
+        levels: Lista de tamanhos de labirinto por nível [(width, height), ...]
         lives: Número de vidas iniciais.
         pacgum_count: Número de pacgums por nível.
         points_per_pacgum: Pontos por pacgum comido.
@@ -84,7 +85,7 @@ class GameSnapshot:
         lives: Vidas restantes.
         level: Nível atual (começa em 1).
         time_remaining: Segundos restantes no nível.
-        level_max_time: Tempo máximo do nível em segundos (para a barra de HUD).
+        level_max_time: Tempo máximo do nível em segundos.
         status: Estado atual do jogo.
     """
 
@@ -100,4 +101,10 @@ class GameSnapshot:
     status: GameStatus
 
 
-from engine.game import PacmanGame  # noqa: E402
+class PacmanGameProtocol(Protocol):
+    """Interface pública do PacmanGame para a UI.
+    """
+
+    def tick(
+            self, direction: Direction | None, dt: float
+    ) -> GameSnapshot: ...
