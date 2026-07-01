@@ -10,6 +10,7 @@ __pycache__/
 dist/
 build/
 myvenv/
+vendor/
 
 subject.pdf
 .DS_Store
