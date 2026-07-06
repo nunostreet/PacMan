@@ -97,6 +97,7 @@ class PacmanGame:
                         self._pacman.respawn(
                             self._width // 2, self._height // 2
                         )
+                        px, py = self._pacman.x, self._pacman.y
 
         if all(cell == 0 for row in self._maze.pacgums for cell in row):
             if self._level >= len(self._config.levels):
@@ -151,6 +152,7 @@ class PacmanGame:
             value: True para congelar, False para retomar movimento.
         """
         self._frozen_ghosts = value
+        self._cheat_used = True
 
     def set_invincible(self, value: bool) -> None:
         """Ativa ou desativa a invencibilidade do Pacman.
@@ -159,24 +161,28 @@ class PacmanGame:
             value: True para invencível, False para normal.
         """
         self._invincible = value
+        self._cheat_used = True
 
-    def add_lives(self) -> None:
+    def add_lives(self, count: int = 1) -> None:
         """Adiciona 1 vida ao jogador."""
-        self._pacman.lives += 1
+        self._pacman.lives += count
+        self._cheat_used = True
 
-    def skip_level(self):
+    def skip_level(self) -> None:
         """Salta 1 nível se ainda for possível."""
+        self._cheat_used = True
         if self._level >= len(self._config.levels):
             self._status = GameStatus.WIN
         else:
             self._level += 1
             self._load_level()
 
-    def go_back_level(self):
+    def go_back_level(self) -> None:
         """Volta 1 nível se ainda for possível."""
         if self._level > 1:
             self._level -= 1
             self._load_level()
+            self._cheat_used = True
 
         # COMENTÁRIO PARA O PEDRO --> INVALIDAR HIGH SCORE
         # QUANDO ALGUMA CHEAT FOR ATIVADA
