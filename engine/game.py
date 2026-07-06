@@ -122,7 +122,8 @@ class PacmanGame:
             level=self._level,
             time_remaining=self._time_remaining,
             level_max_time=self._config.level_max_time,
-            status=self._status
+            status=self._status,
+            cheat_used=self._cheat_used
         )
 
     def _load_level(self) -> None:

@@ -2,14 +2,14 @@ from engine.player import Pacman
 from contracts import Direction
 
 
-def test_init():
+def test_init() -> None:
     pacman = Pacman(start_x=7, start_y=5, lives=3)
     assert pacman.x == 7
     assert pacman.y == 5
     assert pacman.lives == 3
 
 
-def test_respawn():
+def test_respawn() -> None:
     pacman = Pacman(start_x=7, start_y=5, lives=3)
     pacman.respawn(7, 5)
     assert pacman.lives == 2
@@ -24,7 +24,7 @@ neighbors = {
 }
 
 
-def test_move_valid():
+def test_move_valid() -> None:
     pacman = Pacman(0, 0, 3)
     result = pacman.move(Direction.RIGHT, neighbors)
     assert result
@@ -32,7 +32,7 @@ def test_move_valid():
     assert pacman.y == 0
 
 
-def test_move_blocked():
+def test_move_blocked() -> None:
     pacman = Pacman(0, 0, 3)
     result = pacman.move(Direction.UP, neighbors)
     assert not result
