@@ -87,6 +87,7 @@ class GameSnapshot:
         time_remaining: Segundos restantes no nível.
         level_max_time: Tempo máximo do nível em segundos.
         status: Estado atual do jogo.
+        cheat_used: True se algum cheat foi usado (invalida highscore)
     """
 
     pacman_pos: tuple[int, int]
@@ -99,6 +100,7 @@ class GameSnapshot:
     time_remaining: float
     level_max_time: float
     status: GameStatus
+    cheat_used: bool
 
 
 class PacmanGameProtocol(Protocol):
@@ -108,3 +110,13 @@ class PacmanGameProtocol(Protocol):
     def tick(
             self, direction: Direction | None, dt: float
     ) -> GameSnapshot: ...
+
+    def set_frozen_ghosts(self, value: bool) -> None: ...
+
+    def set_invincible(self, value: bool) -> None: ...
+
+    def add_lives(self, count: int = 1) -> None: ...
+
+    def skip_level(self) -> None: ...
+
+    def go_back_level(self) -> None: ...

@@ -47,6 +47,9 @@ class PacmanGame:
         self._level = 1
         self._time_remaining = float(config.level_max_time)
         self._status = GameStatus.PLAYING
+        self._frozen_ghosts = False
+        self._invincible = False
+        self._cheat_used = False
 
     def tick(self, direction: Direction | None, dt: float) -> GameSnapshot:
         """Avança o estado do jogo um frame.
@@ -75,6 +78,8 @@ class PacmanGame:
                 ghost.edible = True
 
         for ghost in self._ghosts:
+            if self._frozen_ghosts:
+                continue
             ghost.move(self._maze.neighbors, (px, py))
             ghost.update(dt)
 
@@ -83,6 +88,8 @@ class PacmanGame:
                 if ghost.edible:
                     self._score += self._config.points_per_ghost
                     ghost.respawn(self._config.ghost_respawn_time)
+                elif self._invincible:
+                    continue
                 else:
                     if self._pacman.lives <= 1:
                         self._status = GameStatus.GAME_OVER
@@ -90,6 +97,7 @@ class PacmanGame:
                         self._pacman.respawn(
                             self._width // 2, self._height // 2
                         )
+                        px, py = self._pacman.x, self._pacman.y
 
         if all(cell == 0 for row in self._maze.pacgums for cell in row):
             if self._level >= len(self._config.levels):
@@ -114,7 +122,8 @@ class PacmanGame:
             level=self._level,
             time_remaining=self._time_remaining,
             level_max_time=self._config.level_max_time,
-            status=self._status
+            status=self._status,
+            cheat_used=self._cheat_used
         )
 
     def _load_level(self) -> None:
@@ -134,3 +143,47 @@ class PacmanGame:
         ]
         self._time_remaining = float(self._config.level_max_time)
         self._status = GameStatus.PLAYING
+
+    # ----- CHEAT MODE FEATURES ------
+
+    def set_frozen_ghosts(self, value: bool) -> None:
+        """Ativa ou desativa o freeze dos fantasmas.
+
+        Args:
+            value: True para congelar, False para retomar movimento.
+        """
+        self._frozen_ghosts = value
+        self._cheat_used = True
+
+    def set_invincible(self, value: bool) -> None:
+        """Ativa ou desativa a invencibilidade do Pacman.
+
+        Args:
+            value: True para invencível, False para normal.
+        """
+        self._invincible = value
+        self._cheat_used = True
+
+    def add_lives(self, count: int = 1) -> None:
+        """Adiciona 1 vida ao jogador."""
+        self._pacman.lives += count
+        self._cheat_used = True
+
+    def skip_level(self) -> None:
+        """Salta 1 nível se ainda for possível."""
+        self._cheat_used = True
+        if self._level >= len(self._config.levels):
+            self._status = GameStatus.WIN
+        else:
+            self._level += 1
+            self._load_level()
+
+    def go_back_level(self) -> None:
+        """Volta 1 nível se ainda for possível."""
+        if self._level > 1:
+            self._level -= 1
+            self._load_level()
+            self._cheat_used = True
+
+        # COMENTÁRIO PARA O PEDRO --> INVALIDAR HIGH SCORE
+        # QUANDO ALGUMA CHEAT FOR ATIVADA

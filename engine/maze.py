@@ -3,7 +3,7 @@ import io
 import logging
 import random
 
-from mazegenerator import MazeGenerator  # type: ignore[import-untyped]
+from mazegenerator import MazeGenerator
 
 logger = logging.getLogger(__name__)
 
