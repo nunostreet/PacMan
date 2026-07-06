@@ -6,6 +6,7 @@ from interface.Victory import Victory
 from interface.GameScreen import GameScreen
 from interface.MainMenu import MainMenu
 from interface.Highscores import Highscores
+from interface.PauseMenu import PauseMenu
 from enum import Enum
 from config.parser import Parser
 from contracts import GameConfig
@@ -18,6 +19,7 @@ class AppStatus(Enum):
     GAME = "GAME"
     EXIT = "EXIT"
     HIGHSCORES = "HIGHSCORES"
+    PAUSED = "PAUSED"
 
 
 class APP:
@@ -34,6 +36,7 @@ class APP:
         self.direction = None
         self.game_screen = GameScreen(self.WIN, self.WIDTH, self.HEIGHT)
         self.menu = MainMenu(self.WIN, self.WIDTH, self.HEIGHT)
+        self.pause_menu = PauseMenu(self.WIN, self.WIDTH, self.HEIGHT)
         self.game_over = GameOver(self.WIN, self.WIDTH, self.HEIGHT)
         self.victory = Victory(self.WIN, self.WIDTH, self.HEIGHT)
         self.highscores = Highscores(
@@ -45,16 +48,20 @@ class APP:
 
         self.highscores.load()
         while self.run:
+
             if self.app_status == AppStatus.MENU:
                 self.WIN.fill("black")
                 dt = self.timer.tick(self.fps) / 1000
                 self.menu.draw_screen()
                 event = self.menu.handle_events()
+
                 if event == 0:
                     self.game = PacmanGame(self.config)
                     self.app_status = AppStatus.GAME
+
                 elif event == 1:
                     self.app_status = AppStatus.HIGHSCORES
+
                 elif event == 3:
                     self.app_status = AppStatus.EXIT
 
@@ -74,6 +81,18 @@ class APP:
 
             if self.app_status == AppStatus.EXIT:
                 self.run = False
+
+            if self.app_status == AppStatus.PAUSED:
+                self.WIN.fill("black")
+                dt = self.timer.tick(self.fps) / 1000
+                self.pause_menu.draw_screen()
+                event = self.pause_menu.handle_events()
+                if event == 0:
+                    self.app_status = AppStatus.GAME
+
+                elif event == 1:
+                    self.app_status = AppStatus.EXIT
+                    self.run = False
 
             if self.app_status == AppStatus.GAME:
                 dt = self.timer.tick(self.fps) / 1000
@@ -95,6 +114,8 @@ class APP:
                                 self.direction = Direction.LEFT
                             if event.key == pygame.K_d:
                                 self.direction = Direction.RIGHT
+                            if event.key == pygame.K_ESCAPE:
+                                self.app_status = AppStatus.PAUSED
 
                 if maze.status == GameStatus.GAME_OVER:
                     self.game_over.draw_screen(maze.score)
