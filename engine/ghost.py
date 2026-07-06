@@ -99,19 +99,26 @@ class Ghost:
         Returns:
             Primeiro passo do caminho mais curto, ou None se não houver caminho
         """
-        queue: deque[tuple[int, int, tuple[int, int] | None]] = deque(
-            [(self.x, self.y, None)]
-        )
-        visited = {(self.x, self.y)}
+        start = (self.x, self.y)
+        prev: dict[tuple[int, int], tuple[int, int] | None] = {start: None}
+        queue: deque[tuple[int, int]] = deque([start])
+
         while queue:
-            x, y, first = queue.popleft()
-            for nx, ny in neighbors[(x, y)]:
-                if (nx, ny) == pacman_pos:
-                    return first if first is not None else (nx, ny)
-                if (nx, ny) not in visited:
-                    visited.add((nx, ny))
-                    next_first: tuple[int, int] | None = (
-                        first if first is not None else (nx, ny)
-                    )
-                    queue.append((nx, ny, next_first))
-        return None
+            pos = queue.popleft()
+            if pos == pacman_pos:
+                break
+            for neighbor in neighbors[pos]:
+                if neighbor not in prev:
+                    prev[neighbor] = pos
+                    queue.append(neighbor)
+
+        if pacman_pos not in prev:
+            return None
+
+        step = pacman_pos
+        while prev[step] != start:
+            parent = prev[step]
+            if parent is None:
+                return None
+            step = parent
+        return step
