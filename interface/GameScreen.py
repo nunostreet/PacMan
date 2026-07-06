@@ -14,6 +14,9 @@ class GameScreen:
         self.PADDING_WIDTH = 20
         self.frame = 0
         self.last_direction = Direction.RIGHT
+        self._load_sprites()
+
+    def _load_sprites(self) -> None:
         self.pacman_right = [
             pygame.image.load("assets/pacman-art/pacman-right/1.png"),
             pygame.image.load("assets/pacman-art/pacman-right/2.png"),
@@ -24,15 +27,15 @@ class GameScreen:
             pygame.image.load("assets/pacman-art/pacman-left/2.png"),
             pygame.image.load("assets/pacman-art/pacman-left/3.png"),
         ]
-        self.pacman_down = [
-            pygame.image.load("assets/pacman-art/pacman-down/1.png"),
-            pygame.image.load("assets/pacman-art/pacman-down/2.png"),
-            pygame.image.load("assets/pacman-art/pacman-down/3.png"),
-        ]
         self.pacman_up = [
             pygame.image.load("assets/pacman-art/pacman-up/1.png"),
             pygame.image.load("assets/pacman-art/pacman-up/2.png"),
             pygame.image.load("assets/pacman-art/pacman-up/3.png"),
+        ]
+        self.pacman_down = [
+            pygame.image.load("assets/pacman-art/pacman-down/1.png"),
+            pygame.image.load("assets/pacman-art/pacman-down/2.png"),
+            pygame.image.load("assets/pacman-art/pacman-down/3.png"),
         ]
         self.pacman_sprites = {
             Direction.RIGHT: self.pacman_right,
@@ -40,6 +43,15 @@ class GameScreen:
             Direction.UP: self.pacman_up,
             Direction.DOWN: self.pacman_down,
         }
+        self.ghost_sprites = {
+            0: pygame.image.load("assets/pacman-art/ghosts/blinky.png"),
+            1: pygame.image.load("assets/pacman-art/ghosts/pinky.png"),
+            2: pygame.image.load("assets/pacman-art/ghosts/inky.png"),
+            3: pygame.image.load("assets/pacman-art/ghosts/clyde.png"),
+        }
+        self.ghost_edible = pygame.image.load(
+            "assets/pacman-art/ghosts/blue_ghost.png"
+        )
 
     def calculate_cell(self, grid: list[list[int]]):
         CELL_H = (
@@ -94,7 +106,7 @@ class GameScreen:
         sprites = self.pacman_sprites[self.last_direction]
         sprite = sprites[self.frame]
         CELL_H, CELL_W = self.calculate_cell(grid)
-        pacman = pygame.transform.scale(sprite, (CELL_W, CELL_H))
+        pacman = pygame.transform.scale(sprite, (CELL_W * 0.5, CELL_H * 0.5))
 
         x = pacman_pos[0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
         y = pacman_pos[1] * CELL_H + self.HUD_HEIGHT + (CELL_H/2)
@@ -111,14 +123,25 @@ class GameScreen:
     def draw_ghosts(self, grid: list[list[int]], ghosts: list[GhostState]):
 
         CELL_H, CELL_W = self.calculate_cell(grid)
-        for ghost in ghosts:
+
+        for i, ghost in enumerate(ghosts):
             if ghost.active:
                 x = ghost.x * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
                 y = ghost.y * CELL_H + self.HUD_HEIGHT + (CELL_H/2)
                 if ghost.edible:
-                    pygame.draw.circle(self.WIN, 'yellow', (x, y), 5)
+                    gh = pygame.transform.scale(
+                        self.ghost_edible, (CELL_W * 0.5, CELL_H * 0.5)
+                    )
+                    gh_rect = gh.get_rect()
+                    gh_rect.center = (x, y)
+                    self.WIN.blit(gh, gh_rect)
                 else:
-                    pygame.draw.circle(self.WIN, 'red', (x, y), 5)
+                    gh = pygame.transform.scale(
+                        self.ghost_sprites[i], (CELL_W * 0.5, CELL_H * 0.5)
+                    )
+                    gh_rect = gh.get_rect()
+                    gh_rect.center = (x, y)
+                    self.WIN.blit(gh, gh_rect)
 
     def draw_pacgums(self, grid: list[list[int]], snapshot: GameSnapshot):
 
