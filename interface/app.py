@@ -5,6 +5,7 @@ from interface.GameOver import GameOver
 from interface.Victory import Victory
 from interface.GameScreen import GameScreen
 from interface.MainMenu import MainMenu
+from interface.Highscores import Highscores
 from enum import Enum
 from config.parser import Parser
 from contracts import GameConfig
@@ -16,6 +17,7 @@ class AppStatus(Enum):
     MENU = "MENU"
     GAME = "GAME"
     EXIT = "EXIT"
+    HIGHSCORES = "HIGHSCORES"
 
 
 class APP:
@@ -29,14 +31,19 @@ class APP:
         self.timer = pygame.time.Clock()
         self.fps = 60
         self.run = True
+        self.direction = None
         self.game_screen = GameScreen(self.WIN, self.WIDTH, self.HEIGHT)
         self.menu = MainMenu(self.WIN, self.WIDTH, self.HEIGHT)
         self.game_over = GameOver(self.WIN, self.WIDTH, self.HEIGHT)
         self.victory = Victory(self.WIN, self.WIDTH, self.HEIGHT)
+        self.highscores = Highscores(
+            config.highscore_filename, self.WIN, self.WIDTH, self.HEIGHT
+        )
         self.app_status = AppStatus.MENU
 
     def run_game(self):
 
+        self.highscores.load()
         while self.run:
             if self.app_status == AppStatus.MENU:
                 self.WIN.fill("black")
@@ -46,40 +53,56 @@ class APP:
                 if event == 0:
                     self.game = PacmanGame(self.config)
                     self.app_status = AppStatus.GAME
+                elif event == 1:
+                    self.app_status = AppStatus.HIGHSCORES
                 elif event == 3:
                     self.app_status = AppStatus.EXIT
+
+            if self.app_status == AppStatus.HIGHSCORES:
+                self.WIN.fill("black")
+                dt = self.timer.tick(self.fps) / 1000
+                self.highscores.draw()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.run = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key in (
+                            pygame.K_ESCAPE,
+                            pygame.K_BACKSPACE,
+                        ):
+                            self.app_status = AppStatus.MENU
 
             if self.app_status == AppStatus.EXIT:
                 self.run = False
 
             if self.app_status == AppStatus.GAME:
                 dt = self.timer.tick(self.fps) / 1000
-                direction = None
                 self.WIN.fill("black")
-                maze = self.game.tick(direction, dt)
 
+                maze = self.game.tick(self.direction, dt)
                 if maze.status == GameStatus.PLAYING:
-
-                    self.game_screen.draw(maze)
+                    self.game_screen.draw(maze, self.direction)
 
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             self.run = False
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_w:
-                                direction = Direction.UP
+                                self.direction = Direction.UP
                             if event.key == pygame.K_s:
-                                direction = Direction.DOWN
+                                self.direction = Direction.DOWN
                             if event.key == pygame.K_a:
-                                direction = Direction.LEFT
+                                self.direction = Direction.LEFT
                             if event.key == pygame.K_d:
-                                direction = Direction.RIGHT
+                                self.direction = Direction.RIGHT
 
                 if maze.status == GameStatus.GAME_OVER:
                     self.game_over.draw_screen(maze.score)
                     player_name = self.game_over.handle_events()
                     if player_name:
                         self.app_status = AppStatus.MENU
+                        self.highscores.add(player_name, maze.score)
+                        self.highscores.save()
                         self.game_over.player_name = ""
 
                 if maze.status == GameStatus.WIN:
@@ -87,6 +110,8 @@ class APP:
                     player_name = self.victory.handle_events()
                     if player_name:
                         self.app_status = AppStatus.MENU
+                        self.highscores.add(player_name, maze.score)
+                        self.highscores.save()
                         self.victory.player_name = ""
 
             pygame.display.flip()
