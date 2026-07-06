@@ -38,7 +38,8 @@ class Parser:
     }
 
     def parse_arguments(self) -> bool:
-        """Validate that exactly one argument is provided and it is a .json file.
+        """Validate that exactly one argument is provided and it is a
+        .json file.
 
         Returns:
             True if the arguments are valid, False otherwise.
