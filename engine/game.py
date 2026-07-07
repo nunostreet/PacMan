@@ -62,6 +62,9 @@ class PacmanGame:
             Estado atual do jogo para a UI renderizar.
         """
 
+        if self._status != GameStatus.PLAYING:
+            return self._build_snapshot()
+
         self._time_remaining -= dt
         if direction is not None:
             self._pacman.move(direction, self._maze.neighbors)
@@ -109,6 +112,10 @@ class PacmanGame:
         if self._time_remaining <= 0:
             self._status = GameStatus.GAME_OVER
 
+        return self._build_snapshot()
+
+    def _build_snapshot(self) -> GameSnapshot:
+        """Constrói e devolve o GameSnapshot com o estado atual."""
         return GameSnapshot(
             pacman_pos=(self._pacman.x, self._pacman.y),
             ghosts=[
