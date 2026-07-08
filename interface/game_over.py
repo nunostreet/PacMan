@@ -1,5 +1,5 @@
 import pygame
-from interface.InterfaceScreen import InterfaceScreen
+from interface.interface_screen import InterfaceScreen
 
 
 class GameOver(InterfaceScreen):

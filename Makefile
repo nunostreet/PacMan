@@ -1,6 +1,6 @@
 PYTHON = venv/bin/python3
 PIP = venv/bin/pip
-CONFIG = config.json
+CONFIG = config/config.json
 
 install:
 	python3 -m venv venv
