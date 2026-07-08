@@ -9,10 +9,10 @@ install:
 	$(PIP) install flake8 mypy pytest
 
 run:
-	$(PYTHON) main.py $(CONFIG)
+	$(PYTHON) pac-man.py $(CONFIG)
 
 debug:
-	$(PYTHON) -m pdb main.py $(CONFIG)
+	$(PYTHON) -m pdb pac-man.py $(CONFIG)
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +

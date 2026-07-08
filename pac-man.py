@@ -1,18 +1,19 @@
-from config.parser import Parser
+import sys
 
+from config.parser import Parser
+from engine.game import PacmanGame
+from interface.app import APP
 
 
 def main() -> int:
-	"""
-	Run the application and return a process exit code.0
-	"""
-
-	try:
-		config = Parser()
-		if config is None:
-			return 1
-    	parse = config.run_parsing()
-		
-    pacman = PacmanGame(parse)
-    game = APP(pacman, parse)
+    parser = Parser()
+    config = parser.run_parsing()
+    if config is None:
+        return 1
+    game = APP(PacmanGame(config), config)
     game.run_game()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

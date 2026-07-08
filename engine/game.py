@@ -50,6 +50,11 @@ class PacmanGame:
         self._frozen_ghosts = False
         self._invincible = False
         self._cheat_used = False
+        self._pacman_timer: float = 0.0
+        self._ghost_timer: float = 0.0
+        self._pacman_interval: float = 0.25
+        self._ghost_interval: float = 0.30
+        self._ghost_flee_interval: float = 0.45
 
     def tick(self, direction: Direction | None, dt: float) -> GameSnapshot:
         """Avança o estado do jogo um frame.
@@ -66,7 +71,22 @@ class PacmanGame:
             return self._build_snapshot()
 
         self._time_remaining -= dt
-        if direction is not None:
+        self._pacman_timer += dt
+        self._ghost_timer += dt
+
+        pacman_can_move = self._pacman_timer >= self._pacman_interval
+        if pacman_can_move:
+            self._pacman_timer = 0.0
+
+        ghosts_flee = any(g.edible for g in self._ghosts)
+        ghost_interval = (
+            self._ghost_flee_interval if ghosts_flee else self._ghost_interval
+        )
+        ghosts_can_move = self._ghost_timer >= ghost_interval
+        if ghosts_can_move:
+            self._ghost_timer = 0.0
+
+        if pacman_can_move and direction is not None:
             self._pacman.move(direction, self._maze.neighbors)
 
         px, py = self._pacman.x, self._pacman.y
@@ -83,7 +103,8 @@ class PacmanGame:
         for ghost in self._ghosts:
             if self._frozen_ghosts:
                 continue
-            ghost.move(self._maze.neighbors, (px, py))
+            if ghosts_can_move:
+                ghost.move(self._maze.neighbors, (px, py))
             ghost.update(dt)
 
         for ghost in self._ghosts:
@@ -130,7 +151,8 @@ class PacmanGame:
             time_remaining=self._time_remaining,
             level_max_time=self._config.level_max_time,
             status=self._status,
-            cheat_used=self._cheat_used
+            cheat_used=self._cheat_used,
+            move_alpha=self._pacman_timer / self._pacman_interval,
         )
 
     def _load_level(self) -> None:

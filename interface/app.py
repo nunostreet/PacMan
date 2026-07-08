@@ -8,7 +8,6 @@ from interface.main_menu import MainMenu
 from interface.highscores import Highscores
 from interface.pause_menu import PauseMenu
 from enum import Enum
-from config.parser import Parser
 from contracts import GameConfig
 
 
@@ -137,11 +136,3 @@ class APP:
 
             pygame.display.flip()
         pygame.quit()
-
-
-if __name__ == '__main__':
-    config = Parser()
-    parse = config.run_parsing()
-    pacman = PacmanGame(parse)
-    game = APP(pacman, parse)
-    game.run_game()
