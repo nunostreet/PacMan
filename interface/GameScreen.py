@@ -63,7 +63,7 @@ class GameScreen:
     def draw_maze(self, grid: list[list[int]]):
         CELL_H, CELL_W = self.calculate_cell(grid)
         for i in range(len(grid)):
-            y = i * CELL_H + self.HUD_HEIGHT
+            y = i * CELL_H
             for j in range(len(grid[i])):
                 x = j * CELL_W + self.PADDING_WIDTH/2
                 pygame.draw.rect(self.WIN, 'black', (x, y, CELL_W, CELL_H))
@@ -109,7 +109,7 @@ class GameScreen:
         pacman = pygame.transform.scale(sprite, (CELL_W * 0.5, CELL_H * 0.5))
 
         x = pacman_pos[0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
-        y = pacman_pos[1] * CELL_H + self.HUD_HEIGHT + (CELL_H/2)
+        y = pacman_pos[1] * CELL_H + (CELL_H/2)
 
         pac = pacman.get_rect()
         pac.center = (x, y)
@@ -127,7 +127,7 @@ class GameScreen:
         for i, ghost in enumerate(ghosts):
             if ghost.active:
                 x = ghost.x * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
-                y = ghost.y * CELL_H + self.HUD_HEIGHT + (CELL_H/2)
+                y = ghost.y * CELL_H + (CELL_H/2)
                 if ghost.edible:
                     gh = pygame.transform.scale(
                         self.ghost_edible, (CELL_W * 0.5, CELL_H * 0.5)
@@ -148,7 +148,7 @@ class GameScreen:
         CELL_H, CELL_W = self.calculate_cell(grid)
         pacgums = snapshot.pacgums
         for i in range(len(pacgums)):
-            y = i * CELL_H + + self.HUD_HEIGHT + (CELL_H/2)
+            y = i * CELL_H + (CELL_H/2)
             for j in range(len(pacgums[i])):
                 x = j * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
                 if pacgums[i][j] == 0:
@@ -161,15 +161,18 @@ class GameScreen:
     def draw_hud(self, snapshot: GameSnapshot):
 
         score = self.font.render(f"Score: {snapshot.score}", True, 'white')
-        self.WIN.blit(score, (0, 0))
+        self.WIN.blit(score, (0, self.HEIGHT - self.HUD_HEIGHT + 10))
         lives = self.font.render(f"Lives: {snapshot.lives}", True, 'white')
-        self.WIN.blit(lives, (100, 0))
+        self.WIN.blit(lives, (100, self.HEIGHT - self.HUD_HEIGHT + 10))
         level = self.font.render(f"Level: {snapshot.level}", True, 'white')
-        self.WIN.blit(level, (200, 0))
+        self.WIN.blit(level, (200, self.HEIGHT - self.HUD_HEIGHT + 10))
         time = self.font.render(
             f"Time Remaining: {snapshot.time_remaining:.2f}", True, 'white'
         )
-        self.WIN.blit(time, (300, 0))
+        self.WIN.blit(time, (300, self.HEIGHT - self.HUD_HEIGHT + 10))
+        if snapshot.cheat_used:
+            cheat = self.font.render("CHEAT MODE", True, 'red')
+            self.WIN.blit(cheat, (400, self.HEIGHT - self.HUD_HEIGHT + 10))
 
     def detect_status(self, status: GameStatus):
 

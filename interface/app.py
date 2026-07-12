@@ -34,6 +34,8 @@ class APP:
         self.fps = 60
         self.run = True
         self.direction = None
+        self._invincible = False
+        self._frozen = False
         self.game_screen = GameScreen(self.WIN, self.WIDTH, self.HEIGHT)
         self.menu = MainMenu(self.WIN, self.WIDTH, self.HEIGHT)
         self.pause_menu = PauseMenu(self.WIN, self.WIDTH, self.HEIGHT)
@@ -116,24 +118,38 @@ class APP:
                                 self.direction = Direction.RIGHT
                             if event.key == pygame.K_ESCAPE:
                                 self.app_status = AppStatus.PAUSED
+                            if event.key == pygame.K_i:
+                                self._invincible = not self._invincible
+                                self.game.set_invincible(self._invincible)
+                            if event.key == pygame.K_f:
+                                self._frozen = not self._frozen
+                                self.game.set_frozen_ghosts(self._frozen)
+                            if event.key == pygame.K_l:
+                                self.game.skip_level()
+                            if event.key == pygame.K_b:
+                                self.game.go_back_level()
+                            if event.key == pygame.K_PLUS or event.key == pygame.K_KP_PLUS:
+                                self.game.add_lives()
 
                 if maze.status == GameStatus.GAME_OVER:
                     self.game_over.draw_screen(maze.score)
                     player_name = self.game_over.handle_events()
                     if player_name:
                         self.app_status = AppStatus.MENU
-                        self.highscores.add(player_name, maze.score)
-                        self.highscores.save()
                         self.game_over.player_name = ""
+                        if not maze.cheat_used:
+                            self.highscores.add(player_name, maze.score)
+                            self.highscores.save()
 
                 if maze.status == GameStatus.WIN:
                     self.victory.draw_screen(maze.score)
                     player_name = self.victory.handle_events()
                     if player_name:
                         self.app_status = AppStatus.MENU
-                        self.highscores.add(player_name, maze.score)
-                        self.highscores.save()
                         self.victory.player_name = ""
+                        if not maze.cheat_used:
+                            self.highscores.add(player_name, maze.score)
+                            self.highscores.save()
 
             pygame.display.flip()
         pygame.quit()
