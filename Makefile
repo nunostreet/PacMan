@@ -1,6 +1,6 @@
 PYTHON = venv/bin/python3
 PIP = venv/bin/pip
-CONFIG = config.json
+CONFIG = config/config.json
 
 install:
 	python3 -m venv venv
@@ -9,10 +9,10 @@ install:
 	$(PIP) install flake8 mypy pytest
 
 run:
-	$(PYTHON) main.py $(CONFIG)
+	$(PYTHON) pac-man.py $(CONFIG)
 
 debug:
-	$(PYTHON) -m pdb main.py $(CONFIG)
+	$(PYTHON) -m pdb pac-man.py $(CONFIG)
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
@@ -21,7 +21,7 @@ clean:
 	find . -name "*.pyc" -delete
 
 lint:
-	venv/bin/flake8 .
+	venv/bin/flake8 . --exclude=venv,.git,__pycache__,.mypy_cache --max-line-length=79
 	venv/bin/mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 test:

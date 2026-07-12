@@ -1,5 +1,5 @@
 from abc import ABC
-from interface.InterfaceScreen import InterfaceScreen
+from interface.interface_screen import InterfaceScreen
 import pygame
 
 

@@ -1,4 +1,4 @@
-from interface.OptionMenu import OptionMenu
+from interface.option_menu import OptionMenu
 
 
 class PauseMenu(OptionMenu):

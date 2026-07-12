@@ -1,14 +1,13 @@
 import pygame
 from engine.game import PacmanGame
 from contracts import Direction, GameStatus
-from interface.GameOver import GameOver
-from interface.Victory import Victory
-from interface.GameScreen import GameScreen
-from interface.MainMenu import MainMenu
-from interface.Highscores import Highscores
-from interface.PauseMenu import PauseMenu
+from interface.game_over import GameOver
+from interface.victory import Victory
+from interface.game_screen import GameScreen
+from interface.main_menu import MainMenu
+from interface.highscores import Highscores
+from interface.pause_menu import PauseMenu
 from enum import Enum
-from config.parser import Parser
 from contracts import GameConfig
 
 
@@ -153,11 +152,3 @@ class APP:
 
             pygame.display.flip()
         pygame.quit()
-
-
-if __name__ == '__main__':
-    config = Parser()
-    parse = config.run_parsing()
-    pacman = PacmanGame(parse)
-    game = APP(pacman, parse)
-    game.run_game()

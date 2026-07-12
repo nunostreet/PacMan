@@ -1,5 +1,5 @@
 import pygame
-from interface.GameOver import GameOver
+from interface.game_over import GameOver
 
 
 class Victory(GameOver):
