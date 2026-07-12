@@ -15,6 +15,8 @@ class GameScreen:
         self.frame = 0
         self.last_direction = Direction.RIGHT
         self._load_sprites()
+        self.prev_pacman_pos: tuple[int, int] = (0, 0)
+        self.prev_ghost_pos: list[tuple[int, int]] = [(0, 0), (0, 0), (0, 0), (0, 0)]
 
     def _load_sprites(self) -> None:
         self.pacman_right = [
@@ -99,35 +101,44 @@ class GameScreen:
         grid: list[list[int]],
         pacman_pos: tuple[int, int],
         direction: Direction,
+        move_alpha: float
     ):
         if direction is not None:
             self.last_direction = direction
 
+        self.frame = int(move_alpha * 3) % 3
         sprites = self.pacman_sprites[self.last_direction]
         sprite = sprites[self.frame]
         CELL_H, CELL_W = self.calculate_cell(grid)
         pacman = pygame.transform.scale(sprite, (CELL_W * 0.5, CELL_H * 0.5))
 
-        x = pacman_pos[0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
-        y = pacman_pos[1] * CELL_H + (CELL_H/2)
+        prev_x = self.prev_pacman_pos[0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
+        prev_y = self.prev_pacman_pos[1] * CELL_H + (CELL_H/2)
+        curr_x = pacman_pos[0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
+        curr_y = pacman_pos[1] * CELL_H + (CELL_H/2)
+
+        x = prev_x + (curr_x - prev_x) * move_alpha
+        y = prev_y + (curr_y - prev_y) * move_alpha
 
         pac = pacman.get_rect()
         pac.center = (x, y)
         self.WIN.blit(pacman, pac)
 
-        if self.frame < 2:
-            self.frame += 1
-        elif self.frame == 2:
-            self.frame = 0
+        self.prev_pacman_pos = pacman_pos
 
-    def draw_ghosts(self, grid: list[list[int]], ghosts: list[GhostState]):
+    def draw_ghosts(self, grid: list[list[int]], ghosts: list[GhostState], move_alpha: float):
 
         CELL_H, CELL_W = self.calculate_cell(grid)
 
         for i, ghost in enumerate(ghosts):
             if ghost.active:
-                x = ghost.x * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
-                y = ghost.y * CELL_H + (CELL_H/2)
+                prev_x = self.prev_ghost_pos[i][0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
+                prev_y = self.prev_ghost_pos[i][1] * CELL_H + (CELL_H/2)
+                curr_x = ghost.x * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
+                curr_y = ghost.y * CELL_H + (CELL_H/2)
+
+                x = prev_x + (curr_x - prev_x) * move_alpha
+                y = prev_y + (curr_y - prev_y) * move_alpha
                 if ghost.edible:
                     gh = pygame.transform.scale(
                         self.ghost_edible, (CELL_W * 0.5, CELL_H * 0.5)
@@ -142,6 +153,7 @@ class GameScreen:
                     gh_rect = gh.get_rect()
                     gh_rect.center = (x, y)
                     self.WIN.blit(gh, gh_rect)
+            self.prev_ghost_pos[i] = (ghost.x, ghost.y)
 
     def draw_pacgums(self, grid: list[list[int]], snapshot: GameSnapshot):
 
@@ -192,6 +204,6 @@ class GameScreen:
         grid = snapshot.maze
         self.draw_maze(grid)
         self.draw_pacgums(grid, snapshot)
-        self.draw_pacman(grid, snapshot.pacman_pos, direction)
-        self.draw_ghosts(grid, snapshot.ghosts)
+        self.draw_pacman(grid, snapshot.pacman_pos, direction, snapshot.move_alpha)
+        self.draw_ghosts(grid, snapshot.ghosts, snapshot.move_alpha)
         self.draw_hud(snapshot)
