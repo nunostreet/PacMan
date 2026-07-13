@@ -30,6 +30,7 @@ class Ghost:
         self.respawn_timer: float = 0
         self.flee_timer: float = 0
         self._rng = random.Random()
+        self._prev: tuple[int, int] | None = None
 
     def move(
             self,
@@ -49,33 +50,37 @@ class Ghost:
         if not options:
             return
 
-        # find the neighbour closest and furthest from Pacman
-        best_dist, worst_dist = 1000, 0
-        move_away = options[0]
-        for neighbor in options:
-            distance = (
-                abs(neighbor[0] - pacman_pos[0])
-                + abs(neighbor[1] - pacman_pos[1])
-            )
-            if distance < best_dist:
-                best_dist = distance
-            if distance > worst_dist:
-                worst_dist = distance
-                move_away = neighbor
+        # no-reverse: can't go back to the cell just came from
+        valid = [o for o in options if o != self._prev] or options
+        old_pos = (self.x, self.y)
 
         if self.edible:
             # flee: 30% chance of random move to make ghosts catchable
             if self._rng.random() < 0.3:
-                self.x, self.y = self._rng.choice(options)
+                self.x, self.y = self._rng.choice(valid)
             else:
-                self.x, self.y = move_away
-        elif self._rng.random() < 0.2:
-            # chase: 20% random noise so ghosts are not perfect
-            self.x, self.y = self._rng.choice(options)
+                self.x, self.y = max(
+                    valid,
+                    key=lambda p: (
+                        abs(p[0] - pacman_pos[0]) + abs(p[1] - pacman_pos[1])
+                    )
+                )
         else:
-            next_pos = self._bfs_next(neighbors, pacman_pos)
-            if next_pos:
-                self.x, self.y = next_pos
+            # greedy: pick the open neighbour closest to Pacman
+            self.x, self.y = min(
+                valid,
+                key=lambda p: (
+                    abs(p[0] - pacman_pos[0]) + abs(p[1] - pacman_pos[1])
+                )
+            )
+        self._prev = old_pos
+        # old BFS approach (kept for reference):
+        # elif self._rng.random() < 0.2:
+        #     self.x, self.y = self._rng.choice(options)
+        # else:
+        #     next_pos = self._bfs_next(neighbors, pacman_pos)
+        #     if next_pos:
+        #         self.x, self.y = next_pos
 
     def respawn(self, timer: float) -> None:
         """Mark the ghost as eaten and start the respawn timer.
@@ -85,6 +90,7 @@ class Ghost:
         """
         self.respawn_timer = timer
         self.edible = False
+        self._prev = None
 
     def update(self, dt: float) -> None:
         """Tick the respawn and flee timers.

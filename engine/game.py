@@ -171,7 +171,11 @@ class PacmanGame:
         return GameSnapshot(
             pacman_pos=(self._pacman.x, self._pacman.y),
             ghosts=[
-                GhostState(g.x, g.y, g.edible, g.respawn_timer <= 0)
+                GhostState(
+                    g.x, g.y, g.edible,
+                    active=g.respawn_timer <= 0,
+                    flashing=g.edible and g.flee_timer < 2.0,
+                )
                 for g in self._ghosts
             ],
             pacgums=self._maze.pacgums,

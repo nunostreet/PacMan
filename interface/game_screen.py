@@ -78,6 +78,11 @@ class GameScreen:
         self.ghost_edible = pygame.image.load(
             "assets/pacman-art/ghosts/blue_ghost.png"
         )
+        # white variant: same shape as blue ghost but all pixels become white
+        self.ghost_flash = self.ghost_edible.copy()
+        self.ghost_flash.fill(
+            (255, 255, 255), special_flags=pygame.BLEND_RGB_MAX
+        )
         self.life_icon = pygame.image.load(
             "assets/pacman-art/other/apple.png"
         )
@@ -111,7 +116,8 @@ class GameScreen:
             y = i * CELL_H
             for j in range(len(grid[i])):
                 x = j * CELL_W + self.PADDING_WIDTH/2
-                pygame.draw.rect(self.WIN, 'black', (x, y, CELL_W, CELL_H))
+                cell_color = (0, 0, 139) if grid[i][j] == 15 else 'black'
+                pygame.draw.rect(self.WIN, cell_color, (x, y, CELL_W, CELL_H))
 
                 if (grid[i][j] & 1):
                     pygame.draw.line(
@@ -240,8 +246,13 @@ class GameScreen:
                 x = prev_x + (curr_x - prev_x) * move_alpha
                 y = prev_y + (curr_y - prev_y) * move_alpha
                 if ghost.edible:
+                    # flash blue/white every 200ms when flee timer is low
+                    if ghost.flashing and pygame.time.get_ticks() // 200 % 2:
+                        sprite = self.ghost_flash
+                    else:
+                        sprite = self.ghost_edible
                     gh = pygame.transform.scale(
-                        self.ghost_edible, (CELL_W * 0.5, CELL_H * 0.5)
+                        sprite, (CELL_W * 0.5, CELL_H * 0.5)
                     )
                     gh_rect = gh.get_rect()
                     gh_rect.center = (int(x), int(y))
@@ -291,26 +302,31 @@ class GameScreen:
             snapshot: Current game snapshot with score, lives, level,
                 time remaining, and cheat mode flag.
         """
-        score = self.font.render(f"Score: {snapshot.score}", True, 'white')
-        self.WIN.blit(score, (0, self.HEIGHT - self.HUD_HEIGHT + 10))
+        y = self.HEIGHT - self.HUD_HEIGHT + 10
 
+        # left: score, then lives icons right after it
+        score = self.font.render(f"Score: {snapshot.score}", True, 'white')
+        self.WIN.blit(score, (10, y))
+        lives_x = 10 + score.get_width() + 20
         for i in range(snapshot.lives):
             icon = pygame.transform.scale(self.life_icon, (20, 20))
-            self.WIN.blit(
-                icon, (100 + i * 25, self.HEIGHT - self.HUD_HEIGHT + 10)
-            )
+            self.WIN.blit(icon, (lives_x + i * 30, y - 6))
 
+        # center: level
         level = self.font.render(f"Level: {snapshot.level}", True, 'white')
-        self.WIN.blit(level, (200, self.HEIGHT - self.HUD_HEIGHT + 10))
+        level_x = self.WIDTH // 2 - level.get_width() // 2
+        self.WIN.blit(level, (level_x, y))
 
-        time = self.font.render(
-            f"Time Remaining: {snapshot.time_remaining:.2f}", True, 'white'
+        # right: time (and cheat label just to the left of it)
+        time_surf = self.font.render(
+            f"Time: {int(snapshot.time_remaining)}s", True, 'white'
         )
-        self.WIN.blit(time, (300, self.HEIGHT - self.HUD_HEIGHT + 10))
+        time_x = self.WIDTH - time_surf.get_width() - 10
+        self.WIN.blit(time_surf, (time_x, y))
 
         if snapshot.cheat_used:
-            cheat = self.font.render("CHEAT MODE", True, 'red')
-            self.WIN.blit(cheat, (600, self.HEIGHT - self.HUD_HEIGHT + 10))
+            cheat = self.font.render("CHEAT", True, 'red')
+            self.WIN.blit(cheat, (time_x - cheat.get_width() - 15, y))
 
     def detect_status(self, status: GameStatus) -> None:
         """Draw a centred win/loss message.

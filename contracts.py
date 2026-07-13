@@ -31,12 +31,14 @@ class GhostState:
         y: Row position.
         edible: True if the ghost can be eaten by Pacman.
         active: False while the ghost is respawning (UI should not draw it).
+        flashing: True when flee mode is nearly over (UI should flash).
     """
 
     x: int
     y: int
     edible: bool = False
     active: bool = True
+    flashing: bool = False
 
 
 @dataclass
