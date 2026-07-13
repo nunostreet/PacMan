@@ -61,6 +61,7 @@ class PacmanGame:
         self._pacman_interval: float = 0.25
         self._ghost_interval: float = 0.30
         self._ghost_flee_interval: float = 0.45
+        self._active_ghost_interval: float = self._ghost_interval
 
     def tick(self, direction: Direction | None, dt: float) -> GameSnapshot:
         """Avança o estado do jogo um frame.
@@ -91,6 +92,7 @@ class PacmanGame:
         ghost_interval = (
             self._ghost_flee_interval if ghosts_flee else self._ghost_interval
         )
+        self._active_ghost_interval = ghost_interval
         ghosts_can_move = self._ghost_timer >= ghost_interval
         if ghosts_can_move:
             self._ghost_timer = 0.0
@@ -120,7 +122,7 @@ class PacmanGame:
 
         # Deteção de colisões: fantasma ativo na mesma célula que o Pacman
         for ghost in self._ghosts:
-            if ghost.respawn_timer == 0 and (px, py) == (ghost.x, ghost.y):
+            if ghost.respawn_timer <= 0 and (px, py) == (ghost.x, ghost.y):
                 if ghost.edible:
                     self._score += self._config.points_per_ghost
                     ghost.respawn(self._config.ghost_respawn_time)
@@ -153,7 +155,7 @@ class PacmanGame:
         return GameSnapshot(
             pacman_pos=(self._pacman.x, self._pacman.y),
             ghosts=[
-                GhostState(g.x, g.y, g.edible, g.respawn_timer == 0)
+                GhostState(g.x, g.y, g.edible, g.respawn_timer <= 0)
                 for g in self._ghosts
             ],
             pacgums=self._maze.pacgums,
@@ -166,6 +168,7 @@ class PacmanGame:
             status=self._status,
             cheat_used=self._cheat_used,
             move_alpha=self._pacman_timer / self._pacman_interval,
+            ghost_move_alpha=self._ghost_timer / self._active_ghost_interval,
         )
 
     def _load_level(self) -> None:

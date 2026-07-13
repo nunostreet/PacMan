@@ -91,11 +91,13 @@ class Ghost:
         if self.respawn_timer > 0:
             self.respawn_timer -= dt
             if self.respawn_timer <= 0:
+                self.respawn_timer = 0.0
                 self.x = self.start_x
                 self.y = self.start_y
         if self.flee_timer > 0:
             self.flee_timer -= dt
             if self.flee_timer <= 0:
+                self.flee_timer = 0.0
                 self.edible = False
 
     def _bfs_next(

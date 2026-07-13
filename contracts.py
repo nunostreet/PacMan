@@ -88,8 +88,10 @@ class GameSnapshot:
         level_max_time: Tempo máximo do nível em segundos.
         status: Estado atual do jogo.
         cheat_used: True se algum cheat foi usado (invalida highscore)
-        move_alpha: Progresso entre células (0.0 = início, 1.0 = chegou).
+        move_alpha: Progresso entre células do Pacman (0.0 = início, 1.0 = chegou).
             Usado pela UI para interpolação de posição suave.
+        ghost_move_alpha: Progresso entre células dos fantasmas (0.0 = início,
+            1.0 = chegou). Usado pela UI para interpolação independente.
     """
 
     pacman_pos: tuple[int, int]
@@ -104,6 +106,7 @@ class GameSnapshot:
     status: GameStatus
     cheat_used: bool
     move_alpha: float
+    ghost_move_alpha: float
 
 
 class PacmanGameProtocol(Protocol):
