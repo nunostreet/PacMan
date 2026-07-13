@@ -26,8 +26,11 @@ class PacmanGame:
         _ghost_timer: Acumulador de tempo (controla a velocidade dos fantasmas)
         _pacman_interval: Segundos entre cada movimento do Pacman.
         _ghost_interval: Segundos entre cada movimento dos fantasmas em chase.
-        _ghost_flee_interval: Segs. entre cada movimento dos fantasmas em flee
+        _ghost_flee_interval: Segundos entre cada movimento dos fantasmas em flee
             (mais lento que chase).
+        _active_ghost_interval: Intervalo de movimento dos fantasmas atualmente
+            ativo — igual a _ghost_interval em chase e _ghost_flee_interval
+            em flee. Usado para calcular ghost_move_alpha no snapshot.
     """
 
     def __init__(self, config: GameConfig) -> None:
@@ -101,17 +104,21 @@ class PacmanGame:
             self._pacman.move(direction, self._maze.neighbors)
 
         px, py = self._pacman.x, self._pacman.y
-        cell = self._maze.pacgums[py][px]
-        if cell == 1:
-            self._score += self._config.points_per_pacgum
-            self._maze.pacgums[py][px] = 0
-        if cell == 2:
-            self._score += self._config.points_per_super_pacgum
-            self._maze.pacgums[py][px] = 0
-            # Super-pacgum: fantasmas ficam edible por ghost_respawn_time
-            for ghost in self._ghosts:
-                ghost.edible = True
-                ghost.flee_timer = float(self._config.ghost_respawn_time)
+        # Só interagir quando o Pacman está visualmente a meio da célula
+        mid_cell = self._pacman_timer / self._pacman_interval >= 0.5
+
+        if mid_cell:
+            cell = self._maze.pacgums[py][px]
+            if cell == 1:
+                self._score += self._config.points_per_pacgum
+                self._maze.pacgums[py][px] = 0
+            if cell == 2:
+                self._score += self._config.points_per_super_pacgum
+                self._maze.pacgums[py][px] = 0
+                # Super-pacgum: fantasmas ficam edible por ghost_respawn_time
+                for ghost in self._ghosts:
+                    ghost.edible = True
+                    ghost.flee_timer = float(self._config.ghost_respawn_time)
 
         for ghost in self._ghosts:
             if self._frozen_ghosts:
@@ -122,7 +129,11 @@ class PacmanGame:
 
         # Deteção de colisões: fantasma ativo na mesma célula que o Pacman
         for ghost in self._ghosts:
-            if ghost.respawn_timer <= 0 and (px, py) == (ghost.x, ghost.y):
+            if (
+                mid_cell
+                and ghost.respawn_timer <= 0
+                and (px, py) == (ghost.x, ghost.y)
+            ):
                 if ghost.edible:
                     self._score += self._config.points_per_ghost
                     ghost.respawn(self._config.ghost_respawn_time)
@@ -151,7 +162,12 @@ class PacmanGame:
         return self._build_snapshot()
 
     def _build_snapshot(self) -> GameSnapshot:
-        """Constrói e devolve o GameSnapshot com o estado atual."""
+        """Constrói e devolve o GameSnapshot com o estado atual do jogo.
+
+        Returns:
+            GameSnapshot com todas as posições, estado dos fantasmas,
+            pacgums, pontuação e fatores de interpolação para a UI.
+        """
         return GameSnapshot(
             pacman_pos=(self._pacman.x, self._pacman.y),
             ghosts=[
