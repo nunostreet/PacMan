@@ -108,7 +108,10 @@ class APP:
                 self.WIN.fill("black")
                 self.timer.tick(self.fps)
                 self.instructions.draw_screen()
-                self.instructions.handle_events()
+                if self.instructions.handle_events():
+                    self.app_status = AppStatus.MENU
+                if self.instructions.quit:
+                    self.run = False
 
             if self.app_status == AppStatus.EXIT:
                 self.run = False
