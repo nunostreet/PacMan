@@ -1,4 +1,5 @@
 from collections import deque
+import random
 
 
 class Ghost:
@@ -10,6 +11,7 @@ class Ghost:
         start_x: Posição horizontal do canto de origem (para respawn).
         start_y: Posição vertical do canto de origem (para respawn).
         edible: True se o fantasma pode ser comido pelo Pacman.
+        flee_timer: Segundos restantes em modo flee (0 = volta a chase).
         respawn_timer: Segundos restantes até o fantasma reaparecer (0 = ativo)
     """
 
@@ -26,6 +28,8 @@ class Ghost:
         self.start_y = start_y
         self.edible: bool = False
         self.respawn_timer: float = 0
+        self.flee_timer: float = 0
+        self._rng = random.Random()
 
     def move(
             self,
@@ -58,7 +62,12 @@ class Ghost:
                 move_away = neighbor
 
         if self.edible:
-            self.x, self.y = move_away
+            if self._rng.random() < 0.3:
+                self.x, self.y = self._rng.choice(options)
+            else:
+                self.x, self.y = move_away
+        elif self._rng.random() < 0.2:
+            self.x, self.y = self._rng.choice(options)
         else:
             next_pos = self._bfs_next(neighbors, pacman_pos)
             if next_pos:
@@ -84,6 +93,10 @@ class Ghost:
             if self.respawn_timer <= 0:
                 self.x = self.start_x
                 self.y = self.start_y
+        if self.flee_timer > 0:
+            self.flee_timer -= dt
+            if self.flee_timer <= 0:
+                self.edible = False
 
     def _bfs_next(
             self,

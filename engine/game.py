@@ -22,6 +22,12 @@ class PacmanGame:
         _level: Nível atual (começa em 1).
         _time_remaining: Segundos restantes no nível.
         _status: Estado atual do jogo.
+        _pacman_timer: Acumulador de tempo (controla a velocidade do Pacman)
+        _ghost_timer: Acumulador de tempo (controla a velocidade dos fantasmas)
+        _pacman_interval: Segundos entre cada movimento do Pacman.
+        _ghost_interval: Segundos entre cada movimento dos fantasmas em chase.
+        _ghost_flee_interval: Segs. entre cada movimento dos fantasmas em flee
+            (mais lento que chase).
     """
 
     def __init__(self, config: GameConfig) -> None:
@@ -67,6 +73,7 @@ class PacmanGame:
             Estado atual do jogo para a UI renderizar.
         """
 
+        # Congela o jogo se já terminou
         if self._status != GameStatus.PLAYING:
             return self._build_snapshot()
 
@@ -74,10 +81,12 @@ class PacmanGame:
         self._pacman_timer += dt
         self._ghost_timer += dt
 
+        # Controlo de velocidade: move quando o acumulador atinge o intervalo
         pacman_can_move = self._pacman_timer >= self._pacman_interval
         if pacman_can_move:
             self._pacman_timer = 0.0
 
+        # Fantasmas em flee movem-se mais devagar
         ghosts_flee = any(g.edible for g in self._ghosts)
         ghost_interval = (
             self._ghost_flee_interval if ghosts_flee else self._ghost_interval
@@ -97,8 +106,10 @@ class PacmanGame:
         if cell == 2:
             self._score += self._config.points_per_super_pacgum
             self._maze.pacgums[py][px] = 0
+            # Super-pacgum: fantasmas ficam edible por ghost_respawn_time
             for ghost in self._ghosts:
                 ghost.edible = True
+                ghost.flee_timer = float(self._config.ghost_respawn_time)
 
         for ghost in self._ghosts:
             if self._frozen_ghosts:
@@ -107,6 +118,7 @@ class PacmanGame:
                 ghost.move(self._maze.neighbors, (px, py))
             ghost.update(dt)
 
+        # Deteção de colisões: fantasma ativo na mesma célula que o Pacman
         for ghost in self._ghosts:
             if ghost.respawn_timer == 0 and (px, py) == (ghost.x, ghost.y):
                 if ghost.edible:
@@ -121,6 +133,7 @@ class PacmanGame:
                         self._pacman.respawn(
                             self._width // 2, self._height // 2
                         )
+                        # Atualizar px, py para evitar colisões duplas
                         px, py = self._pacman.x, self._pacman.y
 
         if all(cell == 0 for row in self._maze.pacgums for cell in row):
