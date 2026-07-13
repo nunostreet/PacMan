@@ -20,7 +20,9 @@ class Highscores:
         self.WIN = win
         self.WIDTH = width
         self.HEIGHT = height
-        self.font = pygame.font.Font(None, 20)
+        self.font = pygame.font.Font(
+            "assets/fonts/PressStart2P-Regular.ttf", 12
+        )
         self.top_players: list[dict] = []
 
     def load(self):

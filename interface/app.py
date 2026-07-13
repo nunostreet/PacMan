@@ -7,6 +7,7 @@ from interface.game_screen import GameScreen
 from interface.main_menu import MainMenu
 from interface.highscores import Highscores
 from interface.pause_menu import PauseMenu
+from interface.instructions import Instructions
 from enum import Enum
 from contracts import GameConfig
 
@@ -18,6 +19,7 @@ class AppStatus(Enum):
     GAME = "GAME"
     EXIT = "EXIT"
     HIGHSCORES = "HIGHSCORES"
+    INSTRUCTIONS = "INSTRUCTIONS"
     PAUSED = "PAUSED"
 
 
@@ -51,6 +53,7 @@ class APP:
         self.game_screen = GameScreen(self.WIN, self.WIDTH, self.HEIGHT)
         self.menu = MainMenu(self.WIN, self.WIDTH, self.HEIGHT)
         self.pause_menu = PauseMenu(self.WIN, self.WIDTH, self.HEIGHT)
+        self.instructions = Instructions(self.WIN, self.WIDTH, self.HEIGHT)
         self.game_over = GameOver(self.WIN, self.WIDTH, self.HEIGHT)
         self.victory = Victory(self.WIN, self.WIDTH, self.HEIGHT)
         self.highscores = Highscores(
@@ -81,6 +84,9 @@ class APP:
                 elif event == 1:
                     self.app_status = AppStatus.HIGHSCORES
 
+                elif event == 2:
+                    self.app_status = AppStatus.INSTRUCTIONS
+
                 elif event == 3:
                     self.app_status = AppStatus.EXIT
 
@@ -88,6 +94,20 @@ class APP:
                 self.WIN.fill("black")
                 dt = self.timer.tick(self.fps) / 1000
                 self.highscores.draw()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.run = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key in (
+                            pygame.K_ESCAPE,
+                            pygame.K_BACKSPACE,
+                        ):
+                            self.app_status = AppStatus.MENU
+
+            if self.app_status == AppStatus.INSTRUCTIONS:
+                self.WIN.fill("black")
+                dt = self.timer.tick(self.fps) / 1000
+                self.instructions.draw_screen()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         self.run = False
