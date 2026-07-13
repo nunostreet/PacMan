@@ -34,6 +34,12 @@ class GameScreen:
         self.prev_ghost_pos: list[tuple[int, int]] = [
             (0, 0), (0, 0), (0, 0), (0, 0)
         ]
+        self.pacman_grid_pos: tuple[int, int] = (0, 0)
+        self.ghost_grid_pos: list[tuple[int, int]] = [
+            (0, 0), (0, 0), (0, 0), (0, 0)
+        ]
+        self.prev_pacman_alpha: float = 0.0
+        self.prev_ghost_alpha: float = 0.0
 
     def _load_sprites(self) -> None:
         """Carrega do disco as imagens do Pac-Man, fantasmas e HUD."""
@@ -164,6 +170,22 @@ class GameScreen:
         CELL_H, CELL_W = self.calculate_cell(grid)
         pacman = pygame.transform.scale(sprite, (CELL_W * 0.5, CELL_H * 0.5))
 
+        if pacman_pos != self.pacman_grid_pos:
+            dx = abs(pacman_pos[0] - self.pacman_grid_pos[0])
+            dy = abs(pacman_pos[1] - self.pacman_grid_pos[1])
+            if dx + dy <= 1:
+                self.prev_pacman_pos = self.pacman_grid_pos
+            else:
+                self.prev_pacman_pos = pacman_pos
+            self.pacman_grid_pos = pacman_pos
+        elif move_alpha < self.prev_pacman_alpha:
+            # O ciclo de movimento reiniciou (alpha voltou a ~0) mas a
+            # célula não mudou: o movimento foi bloqueado (ex: parede).
+            # Fica parado na posição atual em vez de saltar de volta à
+            # célula anterior.
+            self.prev_pacman_pos = pacman_pos
+        self.prev_pacman_alpha = move_alpha
+
         prev_x = (
             self.prev_pacman_pos[0] * CELL_W
             + (self.PADDING_WIDTH / 2) + (CELL_W / 2)
@@ -178,8 +200,6 @@ class GameScreen:
         pac = pacman.get_rect()
         pac.center = (x, y)
         self.WIN.blit(pacman, pac)
-
-        self.prev_pacman_pos = pacman_pos
 
     def draw_ghosts(
         self,
@@ -198,13 +218,30 @@ class GameScreen:
                 dimensões das células.
             ghosts: O estado atual de cada fantasma.
             move_alpha: Fator de interpolação em ``[0, 1]`` entre a
-                posição anterior e a atual na grelha, usado para
+                posição anterior e a atual na grelha (calculado com o
+                intervalo de movimento dos fantasmas), usado para
                 suavizar o movimento entre frames.
         """
         CELL_H, CELL_W = self.calculate_cell(grid)
 
         for i, ghost in enumerate(ghosts):
             if ghost.active:
+
+                if (ghost.x, ghost.y) != self.ghost_grid_pos[i]:
+                    dx = abs(ghost.x - self.ghost_grid_pos[i][0])
+                    dy = abs(ghost.y - self.ghost_grid_pos[i][1])
+                    if dx + dy <= 1:
+                        self.prev_ghost_pos[i] = self.ghost_grid_pos[i]
+                    else:
+                        self.prev_ghost_pos[i] = (ghost.x, ghost.y)
+                    self.ghost_grid_pos[i] = (ghost.x, ghost.y)
+
+                elif move_alpha < self.prev_ghost_alpha:
+                    # Ciclo de movimento reiniciou sem a célula mudar
+                    # (ex: fantasmas congelados pela cheat). Fica
+                    # parado em vez de saltar para a célula anterior.
+                    self.prev_ghost_pos[i] = (ghost.x, ghost.y)
+
                 prev_x = (
                     self.prev_ghost_pos[i][0] * CELL_W
                     + (self.PADDING_WIDTH / 2) + (CELL_W / 2)
@@ -229,7 +266,13 @@ class GameScreen:
                     gh_rect = gh.get_rect()
                     gh_rect.center = (x, y)
                     self.WIN.blit(gh, gh_rect)
-            self.prev_ghost_pos[i] = (ghost.x, ghost.y)
+            else:
+                # Fantasma em respawn: mantém as posições sincronizadas
+                # para não interpolar de forma estranha quando reaparecer.
+                self.prev_ghost_pos[i] = (ghost.x, ghost.y)
+                self.ghost_grid_pos[i] = (ghost.x, ghost.y)
+
+        self.prev_ghost_alpha = move_alpha
 
     def draw_pacgums(self, grid: list[list[int]], snapshot: GameSnapshot):
         """Desenha as pac-gums (pontos e power pellets) no labirinto.
@@ -313,5 +356,5 @@ class GameScreen:
         self.draw_pacman(
             grid, snapshot.pacman_pos, direction, snapshot.move_alpha
         )
-        self.draw_ghosts(grid, snapshot.ghosts, snapshot.move_alpha)
+        self.draw_ghosts(grid, snapshot.ghosts, snapshot.ghost_move_alpha)
         self.draw_hud(snapshot)
