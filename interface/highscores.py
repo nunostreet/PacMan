@@ -37,12 +37,13 @@ class Highscores:
         """
         try:
             with open(self.file, "r") as f:
-                fields: dict[str, int] = json.load(f)
+                fields: list[dict] = json.load(f)
                 self.top_players = fields
         except json.JSONDecodeError as e:
-            raise Exception(f"Invalid JSON syntax: {e}")
+            print(f"Warning: invalid highscore file, starting empty: {e}")
+            self.top_players = []
         except FileNotFoundError:
-            return self.top_players
+            self.top_players = []
 
     def save(self):
         """Escreve a lista ``top_players`` atual no ficheiro JSON."""

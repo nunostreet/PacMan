@@ -14,5 +14,5 @@ class PauseMenu(OptionMenu):
         """
         super().__init__(win, width, height)
         self.options = ["Continue Game",
-                        "Exit"]
+                        "Main Menu"]
         self.selected_option = 0

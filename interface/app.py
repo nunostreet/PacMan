@@ -73,7 +73,7 @@ class APP:
 
             if self.app_status == AppStatus.MENU:
                 self.WIN.fill("black")
-                dt = self.timer.tick(self.fps) / 1000
+                self.timer.tick(self.fps)
                 self.menu.draw_screen()
                 event = self.menu.handle_events()
 
@@ -92,7 +92,7 @@ class APP:
 
             if self.app_status == AppStatus.HIGHSCORES:
                 self.WIN.fill("black")
-                dt = self.timer.tick(self.fps) / 1000
+                self.timer.tick(self.fps)
                 self.highscores.draw()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -106,32 +106,23 @@ class APP:
 
             if self.app_status == AppStatus.INSTRUCTIONS:
                 self.WIN.fill("black")
-                dt = self.timer.tick(self.fps) / 1000
+                self.timer.tick(self.fps)
                 self.instructions.draw_screen()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.run = False
-                    if event.type == pygame.KEYDOWN:
-                        if event.key in (
-                            pygame.K_ESCAPE,
-                            pygame.K_BACKSPACE,
-                        ):
-                            self.app_status = AppStatus.MENU
+                self.instructions.handle_events()
 
             if self.app_status == AppStatus.EXIT:
                 self.run = False
 
             if self.app_status == AppStatus.PAUSED:
                 self.WIN.fill("black")
-                dt = self.timer.tick(self.fps) / 1000
+                self.timer.tick(self.fps)
                 self.pause_menu.draw_screen()
                 event = self.pause_menu.handle_events()
                 if event == 0:
                     self.app_status = AppStatus.GAME
 
                 elif event == 1:
-                    self.app_status = AppStatus.EXIT
-                    self.run = False
+                    self.app_status = AppStatus.MENU
 
             if self.app_status == AppStatus.GAME:
                 dt = self.timer.tick(self.fps) / 1000

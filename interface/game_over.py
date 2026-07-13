@@ -61,9 +61,10 @@ class GameOver(InterfaceScreen):
                 if event.key == pygame.K_BACKSPACE:
                     self.player_name = self.player_name[:-1]
                 elif event.key == pygame.K_RETURN:
-                    return self.player_name
+                    if self.player_name.strip():
+                        return self.player_name
                 else:
-                    if len(self.player_name) <= 10 and (
+                    if len(self.player_name) < 10 and (
                         event.unicode.isalnum() or event.unicode == " "
                     ):
                         self.player_name += event.unicode
