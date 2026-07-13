@@ -3,18 +3,18 @@ import json
 
 
 class Highscores:
-    """Carrega, atualiza, persiste e desenha a lista do top-10."""
+    """Loads, updates, persists, and draws the top-10 list."""
 
     def __init__(
         self, filename: str, win: pygame.Surface, width: int, height: int
-    ):
-        """Configura o ecrã de highscores e o ficheiro que os armazena.
+    ) -> None:
+        """Set up the highscores screen and the backing file.
 
         Args:
-            filename: Caminho do ficheiro JSON que guarda as pontuações.
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            filename: Path to the JSON file that stores scores.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         self.file = filename
         self.WIN = win
@@ -25,16 +25,8 @@ class Highscores:
         )
         self.top_players: list[dict] = []
 
-    def load(self):
-        """Carrega ``top_players`` a partir do ficheiro JSON de highscores.
-
-        Raises:
-            Exception: Se o ficheiro contiver JSON inválido.
-
-        Returns:
-            A lista ``top_players`` atual se o ficheiro ainda não
-            existir, caso contrário ``None``.
-        """
+    def load(self) -> None:
+        """Load top_players from the highscores JSON file."""
         try:
             with open(self.file, "r") as f:
                 fields: list[dict] = json.load(f)
@@ -45,17 +37,17 @@ class Highscores:
         except FileNotFoundError:
             self.top_players = []
 
-    def save(self):
-        """Escreve a lista ``top_players`` atual no ficheiro JSON."""
+    def save(self) -> None:
+        """Write the current top_players list to the JSON file."""
         with open(self.file, "w") as f:
             json.dump(self.top_players, f, ensure_ascii=False)
 
-    def add(self, name: str, score: int):
-        """Insere uma nova pontuação e mantém só o top 10, ordenado desc.
+    def add(self, name: str, score: int) -> None:
+        """Insert a new score and keep only the top 10, sorted descending.
 
         Args:
-            name: O nome do jogador.
-            score: A pontuação do jogador.
+            name: Player name.
+            score: Player score.
         """
         player = {"name": name, "score": score}
         self.top_players.append(player)
@@ -64,8 +56,8 @@ class Highscores:
         )
         self.top_players = new_top[:10]
 
-    def draw(self):
-        """Desenha a lista ordenada dos melhores jogadores e pontuações."""
+    def draw(self) -> None:
+        """Draw the sorted list of top players and their scores."""
         for i in range(len(self.top_players)):
             player = self.top_players[i]
             play = self.font.render(
@@ -73,5 +65,5 @@ class Highscores:
             )
             y = (i + 1) * (self.HEIGHT / (len(self.top_players) + 1))
             text_rect = play.get_rect()
-            text_rect.center = (self.WIDTH // 2, y)
+            text_rect.center = (self.WIDTH // 2, int(y))
             self.WIN.blit(play, text_rect)

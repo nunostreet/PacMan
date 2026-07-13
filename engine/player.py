@@ -2,21 +2,21 @@ from contracts import Direction
 
 
 class Pacman:
-    """Representa o jogador no jogo.
+    """Represents the player.
 
     Attributes:
-        x: Posição horizontal atual.
-        y: Posição vertical atual.
-        lives: Número de vidas restantes.
+        x: Current column.
+        y: Current row.
+        lives: Remaining lives.
     """
 
     def __init__(self, start_x: int, start_y: int, lives: int) -> None:
-        """Inicializa o Pacman na posição e vidas indicadas.
+        """Set starting position and lives.
 
         Args:
-            start_x: Posição horizontal inicial.
-            start_y: Posição vertical inicial.
-            lives: Número de vidas iniciais.
+            start_x: Starting column.
+            start_y: Starting row.
+            lives: Number of starting lives.
         """
         self.x = start_x
         self.y = start_y
@@ -27,14 +27,14 @@ class Pacman:
             direction: Direction,
             neighbors: dict[tuple[int, int], list[tuple[int, int]]]
             ) -> bool:
-        """Tenta mover o Pacman na direção indicada.
+        """Try to move in the given direction.
 
         Args:
-            direction: Direção do movimento.
-            neighbors: Lista de adjacência do labirinto.
+            direction: Desired direction.
+            neighbors: Adjacency list of the maze.
 
         Returns:
-            True se o movimento foi válido, False se havia parede.
+            True if the move was valid, False if blocked by a wall.
         """
         if direction == Direction.UP:
             next_cell = (self.x, self.y - 1)
@@ -51,11 +51,11 @@ class Pacman:
         return False
 
     def respawn(self, start_x: int, start_y: int) -> None:
-        """Retira uma vida ao Pacman e coloca-o no centro do mapa.
+        """Lose a life and return to the starting position.
 
         Args:
-            start_x: Posição horizontal inicial.
-            start_y: Posição vertical inicial.
+            start_x: Respawn column.
+            start_y: Respawn row.
         """
         self.lives -= 1
         self.x = start_x

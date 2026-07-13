@@ -1,25 +1,22 @@
 from abc import ABC, abstractmethod
+from typing import Any
 import pygame
 
 
 class InterfaceScreen(ABC):
-    """Base abstrata para ecrãs do tipo menu desenhados fora do jogo.
+    """Abstract base for menu-style screens drawn outside the game loop.
 
-    As subclasses fornecem as suas próprias implementações de
-    ``draw_screen`` e ``handle_events`` (por ex. menu principal,
-    menu de pausa, ecrã de game over).
+    Subclasses implement draw_screen and handle_events (e.g. main menu,
+    pause menu, game over screen).
     """
 
-    def __init__(self,
-                 win: pygame.Surface,
-                 width: int,
-                 height: int):
-        """Configura as constantes de layout partilhadas e a fonte do HUD.
+    def __init__(self, win: pygame.Surface, width: int, height: int) -> None:
+        """Set up shared layout constants and the HUD font.
 
         Args:
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         self.WIN = win
         self.WIDTH = width
@@ -33,9 +30,9 @@ class InterfaceScreen(ABC):
         self.quit = False
 
     @abstractmethod
-    def draw_screen(self):
-        """Desenha o conteúdo do ecrã na janela."""
+    def draw_screen(self) -> None:
+        """Draw the screen content onto the window."""
 
     @abstractmethod
-    def handle_events(self):
-        """Processa os eventos pygame pendentes para este ecrã."""
+    def handle_events(self) -> Any:
+        """Process pending pygame events for this screen."""

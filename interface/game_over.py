@@ -3,19 +3,18 @@ from interface.interface_screen import InterfaceScreen
 
 
 class GameOver(InterfaceScreen):
-    """Ecrã mostrado quando o jogador perde.
+    """Screen shown when the player loses.
 
-    Também usado como classe base para ``Victory``, que apenas muda
-    o título apresentado.
+    Also used as a base class for Victory, which just changes the title.
     """
 
-    def __init__(self, win: pygame.Surface, width: int, height: int):
-        """Inicializa o ecrã com a pontuação e nome de jogador por omissão.
+    def __init__(self, win: pygame.Surface, width: int, height: int) -> None:
+        """Set up the screen with a default score and player name.
 
         Args:
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         super().__init__(win, width, height)
         self.quit = False
@@ -23,11 +22,11 @@ class GameOver(InterfaceScreen):
         self.player_name = ""
         self.title = "GAME OVER"
 
-    def draw_screen(self, score: int,):
-        """Desenha o título, a pontuação final e a entrada de nome atual.
+    def draw_screen(self, score: int = 0) -> None:
+        """Draw the title, final score, and current name input.
 
         Args:
-            score: A pontuação final do jogador a apresentar.
+            score: Final player score to display.
         """
         content = []
         game = self.font.render(f"{self.title}", True, 'white')
@@ -40,19 +39,17 @@ class GameOver(InterfaceScreen):
         for i in range(len(content)):
             y = (i + 1) * (self.HEIGHT / (len(content) + 1))
             text_rect = content[i].get_rect()
-            text_rect.center = (self.WIDTH // 2, y)
+            text_rect.center = (self.WIDTH // 2, int(y))
             self.WIN.blit(content[i], text_rect)
 
-    def handle_events(self):
-        """Processa eventos de input para editar e submeter o nome.
+    def handle_events(self) -> str | None:
+        """Process input to edit and submit the player name.
 
-        Trata o fecho da aplicação, o backspace para apagar um
-        caracter, a adição de carateres alfanuméricos/espaço (até 10),
-        e o Enter para submeter.
+        Handles app close, backspace, alphanumeric/space input (up to 10
+        chars), and Enter to submit.
 
         Returns:
-            O nome do jogador introduzido se o Enter foi premido, caso
-            contrário ``None``.
+            The entered player name if Enter was pressed, otherwise None.
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

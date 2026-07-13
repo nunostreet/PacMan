@@ -3,20 +3,20 @@ from contracts import GhostState, GameSnapshot, GameStatus, Direction
 
 
 class GameScreen:
-    """Desenha uma única frame de jogo numa janela do pygame.
+    """Draws a single game frame onto a pygame window.
 
-    Guarda os sprites carregados e as posições da frame anterior do
-    Pac-Man e dos fantasmas, usadas para calcular um movimento
-    suave entre células da grelha através de ``move_alpha``.
+    Stores loaded sprites and the previous frame positions of Pac-Man and
+    ghosts, used to interpolate smooth movement between grid cells via
+    move_alpha.
     """
 
-    def __init__(self, win: pygame.Surface, width: int, height: int):
-        """Carrega fontes e sprites e configura as constantes do HUD.
+    def __init__(self, win: pygame.Surface, width: int, height: int) -> None:
+        """Load fonts and sprites and set up HUD constants.
 
         Args:
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         self.WIN = win
         self.WIDTH = width
@@ -42,7 +42,7 @@ class GameScreen:
         self.prev_ghost_alpha: float = 0.0
 
     def _load_sprites(self) -> None:
-        """Carrega do disco as imagens do Pac-Man, fantasmas e HUD."""
+        """Load Pac-Man, ghost, and HUD images from disk."""
         self.pacman_right = [
             pygame.image.load("assets/pacman-art/pacman-right/1.png"),
             pygame.image.load("assets/pacman-art/pacman-right/2.png"),
@@ -82,14 +82,14 @@ class GameScreen:
             "assets/pacman-art/other/apple.png"
         )
 
-    def calculate_cell(self, grid: list[list[int]]):
-        """Calcula o tamanho em pixels de uma única célula do labirinto.
+    def calculate_cell(self, grid: list[list[int]]) -> tuple[float, float]:
+        """Calculate the pixel size of a single maze cell.
 
         Args:
-            grid: A grelha do labirinto, usada para obter linhas e colunas.
+            grid: Maze grid, used to get row and column counts.
 
         Returns:
-            Um tuplo ``(cell_height, cell_width)`` em pixels.
+            A (cell_height, cell_width) tuple in pixels.
         """
         CELL_H = (
             self.HEIGHT - self.HUD_HEIGHT - self.PADDING_BOTTOM
@@ -97,16 +97,14 @@ class GameScreen:
         CELL_W = (self.WIDTH - self.PADDING_WIDTH) / len(grid[0])
         return CELL_H, CELL_W
 
-    def draw_maze(self, grid: list[list[int]]):
-        """Desenha o fundo das células do labirinto e as suas paredes.
+    def draw_maze(self, grid: list[list[int]]) -> None:
+        """Draw the maze cell backgrounds and their walls.
 
-        As paredes de cada célula são codificadas como uma bitmask
-        (1=norte, 2=este, 4=sul, 8=oeste) e desenhadas como linhas
-        brancas individuais.
+        Walls are encoded as a bitmask (1=N, 2=E, 4=S, 8=W) and drawn
+        as individual white lines.
 
         Args:
-            grid: A grelha do labirinto com a bitmask de paredes de
-                cada célula.
+            grid: Maze grid with each cell's wall bitmask.
         """
         CELL_H, CELL_W = self.calculate_cell(grid)
         for i in range(len(grid)):
@@ -115,27 +113,23 @@ class GameScreen:
                 x = j * CELL_W + self.PADDING_WIDTH/2
                 pygame.draw.rect(self.WIN, 'black', (x, y, CELL_W, CELL_H))
 
-                # parede norte
                 if (grid[i][j] & 1):
                     pygame.draw.line(
                         self.WIN, 'white', (x, y), (x + CELL_W, y), 1
                     )
 
-                # parede este
                 if (grid[i][j] & 2):
                     pygame.draw.line(
                         self.WIN, 'white',
                         (x + CELL_W, y), (x + CELL_W, y + CELL_H), 1
                     )
 
-                # parede sul
                 if (grid[i][j] & 4):
                     pygame.draw.line(
                         self.WIN, 'white',
                         (x, y + CELL_H), (x + CELL_W, y + CELL_H), 1
                     )
 
-                # parede oeste
                 if (grid[i][j] & 8):
                     pygame.draw.line(
                         self.WIN, 'white', (x, y), (x, y + CELL_H), 1
@@ -145,21 +139,18 @@ class GameScreen:
         self,
         grid: list[list[int]],
         pacman_pos: tuple[int, int],
-        direction: Direction,
+        direction: Direction | None,
         move_alpha: float
-    ):
-        """Desenha o Pac-Man, animado e interpolado até à sua nova célula.
+    ) -> None:
+        """Draw Pac-Man, animated and interpolated toward his new cell.
 
         Args:
-            grid: A grelha do labirinto, usada para calcular as
-                dimensões das células.
-            pacman_pos: A posição atual do Pac-Man na grelha,
-                ``(col, row)``.
-            direction: A direção atual do Pac-Man, ou ``None`` para
-                manter a última direção conhecida.
-            move_alpha: Fator de interpolação em ``[0, 1]`` entre a
-                posição anterior e a atual na grelha, usado para
-                suavizar o movimento entre frames.
+            grid: Maze grid, used to calculate cell dimensions.
+            pacman_pos: Current Pac-Man grid position as (col, row).
+            direction: Current Pac-Man direction, or None to keep the last
+                known direction.
+            move_alpha: Interpolation factor in [0, 1] between the previous
+                and current grid position, used to smooth movement.
         """
         if direction is not None:
             self.last_direction = direction
@@ -179,10 +170,9 @@ class GameScreen:
                 self.prev_pacman_pos = pacman_pos
             self.pacman_grid_pos = pacman_pos
         elif move_alpha < self.prev_pacman_alpha:
-            # O ciclo de movimento reiniciou (alpha voltou a ~0) mas a
-            # célula não mudou: o movimento foi bloqueado (ex: parede).
-            # Fica parado na posição atual em vez de saltar de volta à
-            # célula anterior.
+            # Movement cycle reset (alpha back to ~0) but the cell didn't
+            # change — movement was blocked by a wall. Stay put instead of
+            # jumping back to the previous cell.
             self.prev_pacman_pos = pacman_pos
         self.prev_pacman_alpha = move_alpha
 
@@ -198,7 +188,7 @@ class GameScreen:
         y = prev_y + (curr_y - prev_y) * move_alpha
 
         pac = pacman.get_rect()
-        pac.center = (x, y)
+        pac.center = (int(x), int(y))
         self.WIN.blit(pacman, pac)
 
     def draw_ghosts(
@@ -206,21 +196,18 @@ class GameScreen:
         grid: list[list[int]],
         ghosts: list[GhostState],
         move_alpha: float,
-    ):
-        """Desenha cada fantasma ativo, interpolado até à sua nova célula.
+    ) -> None:
+        """Draw each active ghost, interpolated toward its new cell.
 
-        Os fantasmas comestíveis são desenhados com o sprite
-        "blue ghost"; os restantes fantasmas ativos usam o seu
-        próprio sprite, indexado pela posição.
+        Edible ghosts use the blue ghost sprite; others use their own sprite
+        indexed by position.
 
         Args:
-            grid: A grelha do labirinto, usada para calcular as
-                dimensões das células.
-            ghosts: O estado atual de cada fantasma.
-            move_alpha: Fator de interpolação em ``[0, 1]`` entre a
-                posição anterior e a atual na grelha (calculado com o
-                intervalo de movimento dos fantasmas), usado para
-                suavizar o movimento entre frames.
+            grid: Maze grid, used to calculate cell dimensions.
+            ghosts: Current state of each ghost.
+            move_alpha: Interpolation factor in [0, 1] between the previous
+                and current grid position (computed with the ghost movement
+                interval), used to smooth movement between frames.
         """
         CELL_H, CELL_W = self.calculate_cell(grid)
 
@@ -237,9 +224,9 @@ class GameScreen:
                     self.ghost_grid_pos[i] = (ghost.x, ghost.y)
 
                 elif move_alpha < self.prev_ghost_alpha:
-                    # Ciclo de movimento reiniciou sem a célula mudar
-                    # (ex: fantasmas congelados pela cheat). Fica
-                    # parado em vez de saltar para a célula anterior.
+                    # Movement cycle reset without the cell changing
+                    # (e.g. ghosts frozen by cheat). Stay put instead of
+                    # jumping back to the previous cell.
                     self.prev_ghost_pos[i] = (ghost.x, ghost.y)
 
                 prev_x = (
@@ -257,32 +244,32 @@ class GameScreen:
                         self.ghost_edible, (CELL_W * 0.5, CELL_H * 0.5)
                     )
                     gh_rect = gh.get_rect()
-                    gh_rect.center = (x, y)
+                    gh_rect.center = (int(x), int(y))
                     self.WIN.blit(gh, gh_rect)
                 else:
                     gh = pygame.transform.scale(
                         self.ghost_sprites[i], (CELL_W * 0.5, CELL_H * 0.5)
                     )
                     gh_rect = gh.get_rect()
-                    gh_rect.center = (x, y)
+                    gh_rect.center = (int(x), int(y))
                     self.WIN.blit(gh, gh_rect)
             else:
-                # Fantasma em respawn: mantém as posições sincronizadas
-                # para não interpolar de forma estranha quando reaparecer.
+                # Ghost is respawning: keep positions in sync so it doesn't
+                # interpolate from a stale position when it comes back.
                 self.prev_ghost_pos[i] = (ghost.x, ghost.y)
                 self.ghost_grid_pos[i] = (ghost.x, ghost.y)
 
         self.prev_ghost_alpha = move_alpha
 
-    def draw_pacgums(self, grid: list[list[int]], snapshot: GameSnapshot):
-        """Desenha as pac-gums (pontos e power pellets) no labirinto.
+    def draw_pacgums(
+            self, grid: list[list[int]], snapshot: GameSnapshot
+    ) -> None:
+        """Draw pacgums (dots and power pellets) on the maze.
 
         Args:
-            grid: A grelha do labirinto, usada para calcular as
-                dimensões das células.
-            snapshot: Snapshot atual do jogo com a disposição das
-                pacgums, onde cada célula é 0 (nenhuma), 1 (ponto)
-                ou 2 (pellet).
+            grid: Maze grid, used to calculate cell dimensions.
+            snapshot: Current game snapshot with the pacgum layout, where
+                each cell is 0 (empty), 1 (dot), or 2 (power pellet).
         """
         CELL_H, CELL_W = self.calculate_cell(grid)
         pacgums = snapshot.pacgums
@@ -297,12 +284,12 @@ class GameScreen:
                 if pacgums[i][j] == 2:
                     pygame.draw.circle(self.WIN, 'white', (x, y), 4)
 
-    def draw_hud(self, snapshot: GameSnapshot):
-        """Desenha o HUD: pontuação, vidas, nível e cronómetro.
+    def draw_hud(self, snapshot: GameSnapshot) -> None:
+        """Draw the HUD: score, lives, level, and timer.
 
         Args:
-            snapshot: Snapshot atual do jogo com a pontuação, vidas,
-                nível, tempo restante e flag de cheat mode a apresentar.
+            snapshot: Current game snapshot with score, lives, level,
+                time remaining, and cheat mode flag.
         """
         score = self.font.render(f"Score: {snapshot.score}", True, 'white')
         self.WIN.blit(score, (0, self.HEIGHT - self.HUD_HEIGHT + 10))
@@ -325,11 +312,11 @@ class GameScreen:
             cheat = self.font.render("CHEAT MODE", True, 'red')
             self.WIN.blit(cheat, (600, self.HEIGHT - self.HUD_HEIGHT + 10))
 
-    def detect_status(self, status: GameStatus):
-        """Desenha uma mensagem centrada de vitória/derrota.
+    def detect_status(self, status: GameStatus) -> None:
+        """Draw a centred win/loss message.
 
         Args:
-            status: O estado atual do jogo a que se deve reagir.
+            status: Current game status to react to.
         """
         if status == GameStatus.GAME_OVER:
             lost = self.font.render("YOU LOST!", True, 'white')
@@ -343,12 +330,14 @@ class GameScreen:
             text_rect.center = (self.WIDTH // 2, self.HEIGHT // 2)
             self.WIN.blit(won, text_rect)
 
-    def draw(self, snapshot: GameSnapshot, direction: Direction):
-        """Desenha uma frame completa: labirinto, pacgums, sprites e HUD.
+    def draw(
+            self, snapshot: GameSnapshot, direction: Direction | None
+    ) -> None:
+        """Draw a complete frame: maze, pacgums, sprites, and HUD.
 
         Args:
-            snapshot: Snapshot atual do jogo a renderizar.
-            direction: A direção atual do Pac-Man.
+            snapshot: Current game snapshot to render.
+            direction: Current Pac-Man direction, or None before first input.
         """
         grid = snapshot.maze
         self.draw_maze(grid)

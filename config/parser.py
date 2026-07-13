@@ -18,7 +18,7 @@ class Parser:
         "lives": 3,
         "seed": 42,
         "level_max_time": 90,
-        "pacgum_count": 10,
+        "pacgum": 10,
         "points_per_pacgum": 10,
         "points_per_super_pacgum": 50,
         "points_per_ghost": 200,
@@ -138,9 +138,9 @@ class Parser:
                 if not isinstance(level["height"], int) or level["height"] < 1:
                     level["height"] = self.DEFAULTS["levels"][i]["height"]
 
-        if not isinstance(result["pacgum_count"], int) or \
-                result["pacgum_count"] < 1:
-            result["pacgum_count"] = self.DEFAULTS["pacgum_count"]
+        if not isinstance(result["pacgum"], int) or \
+                result["pacgum"] < 1:
+            result["pacgum"] = self.DEFAULTS["pacgum"]
 
         if not isinstance(result["points_per_pacgum"], int) or \
                 result["points_per_pacgum"] < 1:
@@ -185,7 +185,7 @@ class Parser:
         return GameConfig(
             levels=levels_as_tuples,
             lives=result["lives"],
-            pacgum_count=result["pacgum_count"],
+            pacgum=result["pacgum"],
             points_per_pacgum=result["points_per_pacgum"],
             points_per_super_pacgum=result["points_per_super_pacgum"],
             points_per_ghost=result["points_per_ghost"],

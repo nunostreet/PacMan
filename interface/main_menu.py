@@ -3,15 +3,15 @@ import pygame
 
 
 class MainMenu(OptionMenu):
-    """O menu de topo com Start, Highscores, Instructions, Exit."""
+    """Top-level menu with Start, Highscores, Instructions, Exit."""
 
-    def __init__(self, win: pygame.Surface, width: int, height: int):
-        """Inicializa o menu principal com o seu conjunto fixo de opções.
+    def __init__(self, win: pygame.Surface, width: int, height: int) -> None:
+        """Initialise the main menu with its fixed option set.
 
         Args:
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         super().__init__(win, width, height)
         self.options = ["Start Game",

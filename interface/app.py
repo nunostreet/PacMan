@@ -24,20 +24,19 @@ class AppStatus(Enum):
 
 
 class APP:
-    """Controlador principal da aplicação que executa o loop do jogo Pac-Man.
+    """Main application controller that runs the Pac-Man game loop.
 
-    Possui a janela do pygame e gere as transições entre ecrãs
-    (menu, jogo, pausa, highscores, game over e vitória) com base
-    no ``AppStatus`` atual.
+    Owns the pygame window and manages transitions between screens
+    (menu, game, pause, highscores, game over, victory) based on
+    the current AppStatus.
     """
 
-    def __init__(self, game: PacmanGame, config: GameConfig):
-        """Inicializa o pygame e cria todos os ecrãs usados pela aplicação.
+    def __init__(self, game: PacmanGame, config: GameConfig) -> None:
+        """Initialise pygame and create all screens used by the app.
 
         Args:
-            game: A instância do motor do jogo Pac-Man que gere o jogo.
-            config: Valores de configuração usados para montar o jogo e
-                os seus ecrãs.
+            game: PacmanGame engine instance that manages the game state.
+            config: Configuration values used to set up the game and screens.
         """
         pygame.init()
         self.game = game
@@ -47,7 +46,7 @@ class APP:
         self.timer = pygame.time.Clock()
         self.fps = 60
         self.run = True
-        self.direction = None
+        self.direction: Direction | None = None
         self._invincible = False
         self._frozen = False
         self.game_screen = GameScreen(self.WIN, self.WIDTH, self.HEIGHT)
@@ -61,12 +60,12 @@ class APP:
         )
         self.app_status = AppStatus.MENU
 
-    def run_game(self):
-        """Executa o loop principal da aplicação até que esta seja fechada.
+    def run_game(self) -> None:
+        """Run the main application loop until the window is closed.
 
-        Desenha repetidamente o ecrã correspondente ao ``AppStatus``
-        atual, processa os eventos de input e avança o estado do jogo,
-        até que ``self.run`` se torne ``False``.
+        Repeatedly draws the screen matching the current AppStatus,
+        processes input events, and advances the game state until
+        self.run becomes False.
         """
         self.highscores.load()
         while self.run:
@@ -94,11 +93,11 @@ class APP:
                 self.WIN.fill("black")
                 self.timer.tick(self.fps)
                 self.highscores.draw()
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
+                for ev in pygame.event.get():
+                    if ev.type == pygame.QUIT:
                         self.run = False
-                    if event.type == pygame.KEYDOWN:
-                        if event.key in (
+                    if ev.type == pygame.KEYDOWN:
+                        if ev.key in (
                             pygame.K_ESCAPE,
                             pygame.K_BACKSPACE,
                         ):
@@ -135,31 +134,31 @@ class APP:
                 if maze.status == GameStatus.PLAYING:
                     self.game_screen.draw(maze, self.direction)
 
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
+                    for ev in pygame.event.get():
+                        if ev.type == pygame.QUIT:
                             self.run = False
-                        if event.type == pygame.KEYDOWN:
-                            if event.key == pygame.K_w:
+                        if ev.type == pygame.KEYDOWN:
+                            if ev.key == pygame.K_w:
                                 self.direction = Direction.UP
-                            if event.key == pygame.K_s:
+                            if ev.key == pygame.K_s:
                                 self.direction = Direction.DOWN
-                            if event.key == pygame.K_a:
+                            if ev.key == pygame.K_a:
                                 self.direction = Direction.LEFT
-                            if event.key == pygame.K_d:
+                            if ev.key == pygame.K_d:
                                 self.direction = Direction.RIGHT
-                            if event.key == pygame.K_ESCAPE:
+                            if ev.key == pygame.K_ESCAPE:
                                 self.app_status = AppStatus.PAUSED
-                            if event.key == pygame.K_i:
+                            if ev.key == pygame.K_i:
                                 self._invincible = not self._invincible
                                 self.game.set_invincible(self._invincible)
-                            if event.key == pygame.K_f:
+                            if ev.key == pygame.K_f:
                                 self._frozen = not self._frozen
                                 self.game.set_frozen_ghosts(self._frozen)
-                            if event.key == pygame.K_l:
+                            if ev.key == pygame.K_l:
                                 self.game.skip_level()
-                            if event.key == pygame.K_b:
+                            if ev.key == pygame.K_b:
                                 self.game.go_back_level()
-                            if event.key in (
+                            if ev.key in (
                                 pygame.K_PLUS,
                                 pygame.K_KP_PLUS,
                             ):

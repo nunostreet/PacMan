@@ -4,7 +4,7 @@ from typing import Protocol
 
 
 class Direction(Enum):
-    """Direções de movimento possíveis."""
+    """Player movement directions."""
 
     UP = "UP"
     DOWN = "DOWN"
@@ -13,7 +13,7 @@ class Direction(Enum):
 
 
 class GameStatus(Enum):
-    """Estado atual do jogo."""
+    """Current state of the game."""
 
     PLAYING = "PLAYING"
     PAUSED = "PAUSED"
@@ -24,13 +24,13 @@ class GameStatus(Enum):
 
 @dataclass
 class GhostState:
-    """Estado de um fantasma num dado momento.
+    """Snapshot of a single ghost at a given moment.
 
     Attributes:
-        x: Posição horizontal.
-        y: Posição vertical.
-        edible: True se o fantasma pode ser comido.
-        active: False quando está em respawn (UI não deve desenhar).
+        x: Column position.
+        y: Row position.
+        edible: True if the ghost can be eaten by Pacman.
+        active: False while the ghost is respawning (UI should not draw it).
     """
 
     x: int
@@ -41,19 +41,19 @@ class GhostState:
 
 @dataclass
 class GameConfig:
-    """Configuração do jogo carregada do config.json.
+    """Game configuration loaded from config.json.
 
     Attributes:
-        levels: Lista de tamanhos de labirinto por nível [(width, height), ...]
-        lives: Número de vidas iniciais.
-        pacgum_count: Número de pacgums por nível.
-        points_per_pacgum: Pontos por pacgum comido.
-        points_per_super_pacgum: Pontos por super-pacgum comido.
-        points_per_ghost: Pontos por fantasma comido.
-        ghost_respawn_time: Segundos até um fantasma comido reaparecer.
-        level_max_time: Tempo máximo por nível em segundos.
-        seed: Seed do labirinto do nível 1 (níveis seguintes usam seed=0).
-        highscore_filename: Caminho para o ficheiro de highscores.
+        levels: List of maze sizes per level as (width, height) tuples.
+        lives: Starting number of lives.
+        pacgum: Number of pacgums to place per level.
+        points_per_pacgum: Points awarded for eating a pacgum.
+        points_per_super_pacgum: Points awarded for eating a super-pacgum.
+        points_per_ghost: Points awarded for eating a ghost.
+        ghost_respawn_time: Seconds before an eaten ghost comes back.
+        level_max_time: Time limit per level in seconds.
+        seed: Maze seed for level 1 (subsequent levels use seed=0).
+        highscore_filename: Path to the highscores JSON file.
     """
 
     levels: list[tuple[int, int]] = field(default_factory=lambda: [
@@ -61,7 +61,7 @@ class GameConfig:
         (25, 17), (25, 19), (27, 19), (29, 21), (31, 21)
     ])
     lives: int = 3
-    pacgum_count: int = 42
+    pacgum: int = 42
     points_per_pacgum: int = 10
     points_per_super_pacgum: int = 50
     points_per_ghost: int = 200
@@ -73,25 +73,24 @@ class GameConfig:
 
 @dataclass
 class GameSnapshot:
-    """Estado completo do jogo num dado momento, para a UI renderizar.
+    """Full game state at a given moment, for the UI to render.
 
     Attributes:
-        pacman_pos: Posição do Pacman (x, y).
-        ghosts: Lista com o estado de cada fantasma.
-        pacgums: Grelha com 0 (vazio), 1 (pacgum) ou 2 (super-pacgum).
-        maze: Grelha de bitmask do labirinto (N=1, E=2, S=4, W=8)
-            para desenhar paredes.
-        score: Pontuação atual.
-        lives: Vidas restantes.
-        level: Nível atual (começa em 1).
-        time_remaining: Segundos restantes no nível.
-        level_max_time: Tempo máximo do nível em segundos.
-        status: Estado atual do jogo.
-        cheat_used: True se algum cheat foi usado (invalida highscore)
-        move_alpha: Progresso entre células do Pacman (0.0 = início, 1.0 = chegou).
-            Usado pela UI para interpolação de posição suave.
-        ghost_move_alpha: Progresso entre células dos fantasmas (0.0 = início,
-            1.0 = chegou). Usado pela UI para interpolação independente.
+        pacman_pos: Pacman position as (x, y).
+        ghosts: State of each ghost.
+        pacgums: Grid where 0=empty, 1=pacgum, 2=super-pacgum.
+        maze: Bitmask grid (N=1, E=2, S=4, W=8) for drawing walls.
+        score: Current score.
+        lives: Remaining lives.
+        level: Current level (starts at 1).
+        time_remaining: Seconds left in the level.
+        level_max_time: Total time allowed per level.
+        status: Current game status.
+        cheat_used: True if any cheat was activated (invalidates highscore).
+        move_alpha: Pacman's progress between cells (0.0=just moved,
+            ~1.0=about to move). Used by the UI to interpolate position.
+        ghost_move_alpha: Same as move_alpha but for ghosts, based on
+            their own movement interval.
     """
 
     pacman_pos: tuple[int, int]
@@ -110,7 +109,8 @@ class GameSnapshot:
 
 
 class PacmanGameProtocol(Protocol):
-    """Interface pública do PacmanGame para a UI.
+    """Public interface of PacmanGame, used by the UI
+    to avoid circular imports.
     """
 
     def tick(

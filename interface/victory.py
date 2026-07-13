@@ -3,19 +3,18 @@ from interface.game_over import GameOver
 
 
 class Victory(GameOver):
-    """Ecrã mostrado quando o jogador ganha.
+    """Screen shown when the player wins.
 
-    Reutiliza a lógica de desenho e input de ``GameOver`` com um
-    título diferente.
+    Reuses the drawing and input logic from GameOver with a different title.
     """
 
-    def __init__(self, win: pygame.Surface, width: int, height: int):
-        """Inicializa o ecrã com o título "YOU WON".
+    def __init__(self, win: pygame.Surface, width: int, height: int) -> None:
+        """Initialise the victory screen with the title "YOU WON".
 
         Args:
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         super().__init__(win, width, height)
         self.title = "YOU WON"

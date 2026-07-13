@@ -4,26 +4,26 @@ import pygame
 
 
 class OptionMenu(InterfaceScreen, ABC):
-    """Uma lista de opções de texto selecionável e percorrível.
+    """A scrollable list of text options.
 
-    As subclasses preenchem ``self.options`` com as suas entradas de
-    menu (por ex. ``MainMenu``, ``PauseMenu``).
+    Subclasses fill self.options with their menu entries
+    (e.g. MainMenu, PauseMenu).
     """
 
-    def __init__(self, win: pygame.Surface, width: int, height: int):
-        """Inicializa o menu com uma lista de opções vazia.
+    def __init__(self, win: pygame.Surface, width: int, height: int) -> None:
+        """Initialise the menu with an empty option list.
 
         Args:
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         super().__init__(win, width, height)
-        self.options = []
+        self.options: list[str] = []
         self.selected_option = 0
 
-    def draw_screen(self):
-        """Desenha todas as opções, destacando a atualmente selecionada."""
+    def draw_screen(self) -> None:
+        """Draw all options, highlighting the currently selected one."""
         for i in range(len(self.options)):
             if i == self.selected_option:
                 op = self.font.render(self.options[i], True, 'yellow')
@@ -31,18 +31,16 @@ class OptionMenu(InterfaceScreen, ABC):
                 op = self.font.render(self.options[i], True, 'white')
             y = (i + 1) * (self.HEIGHT / (len(self.options) + 1))
             text_rect = op.get_rect()
-            text_rect.center = (self.WIDTH // 2, y)
+            text_rect.center = (self.WIDTH // 2, int(y))
             self.WIN.blit(op, text_rect)
 
-    def handle_events(self):
-        """Processa eventos de input para navegar e selecionar opções.
+    def handle_events(self) -> int | None:
+        """Process input to navigate and select options.
 
-        W/S movem a seleção para cima/baixo (limitada aos limites da
-        lista) e o Enter confirma a seleção atual.
+        W/S move the selection up/down; Enter confirms the current selection.
 
         Returns:
-            O índice da opção selecionada se o Enter foi premido,
-            caso contrário ``None``.
+            Index of the selected option if Enter was pressed, otherwise None.
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

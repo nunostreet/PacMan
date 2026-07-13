@@ -3,15 +3,15 @@ import pygame
 
 
 class Instructions(InterfaceScreen):
-    """Ecrã estático que mostra os controlos e regras do jogo."""
+    """Static screen showing game controls and rules."""
 
-    def __init__(self, win, width, height):
-        """Inicializa o ecrã de instruções.
+    def __init__(self, win: pygame.Surface, width: int, height: int) -> None:
+        """Initialise the instructions screen.
 
         Args:
-            win: A superfície do pygame onde o ecrã é desenhado.
-            width: Largura da janela em pixels.
-            height: Altura da janela em pixels.
+            win: Pygame surface to draw on.
+            width: Window width in pixels.
+            height: Window height in pixels.
         """
         super().__init__(win, width, height)
         self.lines = [
@@ -29,18 +29,20 @@ class Instructions(InterfaceScreen):
             "Press ESC to go back",
         ]
 
-    def draw_screen(self):
-        """Desenha as instruções centradas no ecrã."""
-
+    def draw_screen(self) -> None:
+        """Draw instructions centred on screen."""
         for i, line in enumerate(self.lines):
             text = self.font.render(line, True, 'white')
             text_rect = text.get_rect()
             text_rect.center = (self.WIDTH // 2, 80 + i * 40)
             self.WIN.blit(text, text_rect)
 
-    def handle_events(self):
-        """Processa eventos — ESC volta ao menu."""
+    def handle_events(self) -> bool | None:
+        """Process events — ESC returns to the menu.
 
+        Returns:
+            True if the user pressed ESC, otherwise None.
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.quit = True

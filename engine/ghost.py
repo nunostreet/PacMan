@@ -3,24 +3,24 @@ import random
 
 
 class Ghost:
-    """Representa um fantasma no jogo.
+    """Represents a ghost in the game.
 
     Attributes:
-        x: Posição horizontal atual.
-        y: Posição vertical atual.
-        start_x: Posição horizontal do canto de origem (para respawn).
-        start_y: Posição vertical do canto de origem (para respawn).
-        edible: True se o fantasma pode ser comido pelo Pacman.
-        flee_timer: Segundos restantes em modo flee (0 = volta a chase).
-        respawn_timer: Segundos restantes até o fantasma reaparecer (0 = ativo)
+        x: Current column.
+        y: Current row.
+        start_x: Spawn column (corner of the maze).
+        start_y: Spawn row (corner of the maze).
+        edible: True if the ghost can be eaten by Pacman.
+        flee_timer: Seconds remaining in flee mode (0 = back to chase).
+        respawn_timer: Seconds until the ghost comes back (0 = active).
     """
 
     def __init__(self, start_x: int, start_y: int) -> None:
-        """Inicializa o fantasma no canto indicado.
+        """Place the ghost at the given corner.
 
         Args:
-            start_x: Posição horizontal inicial.
-            start_y: Posição vertical inicial.
+            start_x: Starting column.
+            start_y: Starting row.
         """
         self.x = start_x
         self.y = start_y
@@ -36,19 +36,21 @@ class Ghost:
             neighbors: dict[tuple[int, int], list[tuple[int, int]]],
             pacman_pos: tuple[int, int]
             ) -> None:
-        """Move o fantasma autonomamente com base no modo atual.
+        """Move the ghost one cell based on current mode.
 
         Args:
-            neighbors: Lista de adjacência do labirinto.
-            pacman_pos: Posição atual do Pacman (x, y).
+            neighbors: Maze adjacency list.
+            pacman_pos: Current Pacman position as (x, y).
         """
 
         if self.respawn_timer > 0:
             return
-        best_dist, worst_dist = 1000, 0
         options = neighbors[(self.x, self.y)]
         if not options:
             return
+
+        # find the neighbour closest and furthest from Pacman
+        best_dist, worst_dist = 1000, 0
         move_away = options[0]
         for neighbor in options:
             distance = (
@@ -62,11 +64,13 @@ class Ghost:
                 move_away = neighbor
 
         if self.edible:
+            # flee: 30% chance of random move to make ghosts catchable
             if self._rng.random() < 0.3:
                 self.x, self.y = self._rng.choice(options)
             else:
                 self.x, self.y = move_away
         elif self._rng.random() < 0.2:
+            # chase: 20% random noise so ghosts are not perfect
             self.x, self.y = self._rng.choice(options)
         else:
             next_pos = self._bfs_next(neighbors, pacman_pos)
@@ -74,19 +78,19 @@ class Ghost:
                 self.x, self.y = next_pos
 
     def respawn(self, timer: float) -> None:
-        """Marca o fantasma como comido e arranca o timer de respawn.
+        """Mark the ghost as eaten and start the respawn timer.
 
         Args:
-            timer: Segundos até o fantasma reaparecer.
+            timer: Seconds before the ghost comes back.
         """
         self.respawn_timer = timer
         self.edible = False
 
     def update(self, dt: float) -> None:
-        """Atualiza o timer de respawn e repõe o fantasma quando termina.
+        """Tick the respawn and flee timers.
 
         Args:
-            dt: Tempo em segundos desde o último frame.
+            dt: Seconds since the last frame.
         """
         if self.respawn_timer > 0:
             self.respawn_timer -= dt
@@ -105,14 +109,14 @@ class Ghost:
             neighbors: dict[tuple[int, int], list[tuple[int, int]]],
             pacman_pos: tuple[int, int]
             ) -> tuple[int, int] | None:
-        """Encontra o próximo passo do caminho mais curto até ao Pacman via BFS
+        """Return the first step of the shortest path to Pacman via BFS.
 
         Args:
-            neighbors: Lista de adjacência do labirinto.
-            pacman_pos: Posição atual do Pacman (x, y).
+            neighbors: Maze adjacency list.
+            pacman_pos: Target position.
 
         Returns:
-            Primeiro passo do caminho mais curto, ou None se não houver caminho
+            First step toward Pacman, or None if unreachable.
         """
         start = (self.x, self.y)
         prev: dict[tuple[int, int], tuple[int, int] | None] = {start: None}
@@ -130,6 +134,7 @@ class Ghost:
         if pacman_pos not in prev:
             return None
 
+        # reconstruct path backwards to find the first step
         step = pacman_pos
         while prev[step] != start:
             parent = prev[step]

@@ -27,7 +27,7 @@ class MazeLoader:
             ) -> bool:
 
         try:
-            # Gerar o maze e redirecionar prints da package apra logger
+            # redirect MazeGenerator stdout to logger to keep output clean
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf):
                 mg = MazeGenerator(
@@ -63,6 +63,7 @@ class MazeLoader:
             for x in range(self.width):
                 cell = maze_grid[y][x]
                 valid = []
+                # bit=0 means the wall is open (passage exists)
                 if not (cell & 1):
                     valid.append((x, y - 1))
                 if not (cell & 2):
@@ -81,7 +82,7 @@ class MazeLoader:
             pacgum_count: int
             ) -> list[list[int]]:
 
-        # Onde ficam as Super Pacgums
+        # super-pacgums go in the four corners
         corners = {
             (0, 0),
             (self.width - 1, 0),

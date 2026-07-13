@@ -8,43 +8,43 @@ from .ghost import Ghost
 
 
 class PacmanGame:
-    """Lógica principal do jogo Pac-Man.
+    """Main game logic for Pac-Man.
 
-    Gere o estado do jogo a cada frame e expõe-o via GameSnapshot.
-    Não tem dependências gráficas — a UI consome esta classe via tick().
+    Advances the game state each frame and exposes it via GameSnapshot.
+    No pygame dependency — the UI consumes this class through tick().
 
     Attributes:
-        _config: Configuração do jogo.
-        _maze: Labirinto atual com vizinhos e pacgums.
-        _pacman: Estado do jogador.
-        _ghosts: Lista dos 4 fantasmas.
-        _score: Pontuação acumulada.
-        _level: Nível atual (começa em 1).
-        _time_remaining: Segundos restantes no nível.
-        _status: Estado atual do jogo.
-        _pacman_timer: Acumulador de tempo (controla a velocidade do Pacman)
-        _ghost_timer: Acumulador de tempo (controla a velocidade dos fantasmas)
-        _pacman_interval: Segundos entre cada movimento do Pacman.
-        _ghost_interval: Segundos entre cada movimento dos fantasmas em chase.
-        _ghost_flee_interval: Segundos entre cada movimento dos fantasmas em flee
-            (mais lento que chase).
-        _active_ghost_interval: Intervalo de movimento dos fantasmas atualmente
-            ativo — igual a _ghost_interval em chase e _ghost_flee_interval
-            em flee. Usado para calcular ghost_move_alpha no snapshot.
+        _config: Game configuration.
+        _maze: Current maze with adjacency list and pacgum grid.
+        _pacman: Player state.
+        _ghosts: List of the 4 ghosts.
+        _score: Accumulated score.
+        _level: Current level (starts at 1).
+        _time_remaining: Seconds left in the level.
+        _status: Current game status.
+        _pacman_timer: Time accumulator for Pacman movement speed.
+        _ghost_timer: Time accumulator for ghost movement speed.
+        _pacman_interval: Seconds between each Pacman move.
+        _ghost_interval: Seconds between each ghost move in chase mode.
+        _ghost_flee_interval: Seconds between each ghost move in flee mode
+            (slower than chase).
+        _active_ghost_interval: The interval currently in use — equals
+            _ghost_interval in chase and _ghost_flee_interval in flee.
+            Used to compute ghost_move_alpha in the snapshot.
     """
 
     def __init__(self, config: GameConfig) -> None:
-        """Inicializa o jogo com a configuração fornecida.
+        """Set up the game with the given configuration.
 
         Args:
-            config: Configuração carregada do config.json.
+            config: Configuration loaded from config.json.
         """
         self._config = config
         width, height = self._config.levels[0]
         self._width = width
         self._height = height
         self._maze = MazeLoader()
-        self._maze.load(width, height, config.seed, config.pacgum_count)
+        self._maze.load(width, height, config.seed, config.pacgum)
         self._pacman = Pacman(width // 2, height // 2, config.lives)
         self._ghosts = [
             Ghost(0, 0),
@@ -67,17 +67,17 @@ class PacmanGame:
         self._active_ghost_interval: float = self._ghost_interval
 
     def tick(self, direction: Direction | None, dt: float) -> GameSnapshot:
-        """Avança o estado do jogo um frame.
+        """Advance the game state by one frame.
 
         Args:
-            direction: Direção do jogador, ou None se não houve input.
-            dt: Tempo em segundos desde o último frame.
+            direction: Player input direction, or None if no input.
+            dt: Seconds since the last frame.
 
         Returns:
-            Estado atual do jogo para a UI renderizar.
+            Current game state for the UI to render.
         """
 
-        # Congela o jogo se já terminou
+        # freeze the game once it ends
         if self._status != GameStatus.PLAYING:
             return self._build_snapshot()
 
@@ -85,12 +85,12 @@ class PacmanGame:
         self._pacman_timer += dt
         self._ghost_timer += dt
 
-        # Controlo de velocidade: move quando o acumulador atinge o intervalo
+        # only move when the accumulator hits the interval
         pacman_can_move = self._pacman_timer >= self._pacman_interval
         if pacman_can_move:
             self._pacman_timer = 0.0
 
-        # Fantasmas em flee movem-se mais devagar
+        # ghosts move slower while in flee mode
         ghosts_flee = any(g.edible for g in self._ghosts)
         ghost_interval = (
             self._ghost_flee_interval if ghosts_flee else self._ghost_interval
@@ -104,7 +104,7 @@ class PacmanGame:
             self._pacman.move(direction, self._maze.neighbors)
 
         px, py = self._pacman.x, self._pacman.y
-        # Só interagir quando o Pacman está visualmente a meio da célula
+        # only interact once Pacman is visually halfway into the cell
         mid_cell = self._pacman_timer / self._pacman_interval >= 0.5
 
         if mid_cell:
@@ -115,7 +115,7 @@ class PacmanGame:
             if cell == 2:
                 self._score += self._config.points_per_super_pacgum
                 self._maze.pacgums[py][px] = 0
-                # Super-pacgum: fantasmas ficam edible por ghost_respawn_time
+                # super-pacgum: all ghosts enter flee mode
                 for ghost in self._ghosts:
                     ghost.edible = True
                     ghost.flee_timer = float(self._config.ghost_respawn_time)
@@ -127,7 +127,7 @@ class PacmanGame:
                 ghost.move(self._maze.neighbors, (px, py))
             ghost.update(dt)
 
-        # Deteção de colisões: fantasma ativo na mesma célula que o Pacman
+        # collision: ghost active in the same cell as Pacman
         for ghost in self._ghosts:
             if (
                 mid_cell
@@ -146,7 +146,7 @@ class PacmanGame:
                         self._pacman.respawn(
                             self._width // 2, self._height // 2
                         )
-                        # Atualizar px, py para evitar colisões duplas
+                        # update px, py to avoid double collision in same frame
                         px, py = self._pacman.x, self._pacman.y
 
         if all(cell == 0 for row in self._maze.pacgums for cell in row):
@@ -162,11 +162,11 @@ class PacmanGame:
         return self._build_snapshot()
 
     def _build_snapshot(self) -> GameSnapshot:
-        """Constrói e devolve o GameSnapshot com o estado atual do jogo.
+        """Build and return a GameSnapshot with the current game state.
 
         Returns:
-            GameSnapshot com todas as posições, estado dos fantasmas,
-            pacgums, pontuação e fatores de interpolação para a UI.
+            GameSnapshot with positions, ghost states, pacgums,
+            score, and interpolation factors for the UI.
         """
         return GameSnapshot(
             pacman_pos=(self._pacman.x, self._pacman.y),
@@ -188,12 +188,12 @@ class PacmanGame:
         )
 
     def _load_level(self) -> None:
-        """Carrega o labirinto e repõe entidades para o nível atual."""
+        """Load the maze and reset entities for the current level."""
         width, height = self._config.levels[self._level - 1]
         self._width = width
         self._height = height
         seed = self._config.seed if self._level == 1 else 0
-        self._maze.load(width, height, seed, self._config.pacgum_count)
+        self._maze.load(width, height, seed, self._config.pacgum)
         self._pacman.x = width // 2
         self._pacman.y = height // 2
         self._ghosts = [
@@ -205,33 +205,33 @@ class PacmanGame:
         self._time_remaining = float(self._config.level_max_time)
         self._status = GameStatus.PLAYING
 
-    # ----- CHEAT MODE FEATURES ------
+    # ----- CHEAT MODE ------
 
     def set_frozen_ghosts(self, value: bool) -> None:
-        """Ativa ou desativa o freeze dos fantasmas.
+        """Freeze or unfreeze all ghosts.
 
         Args:
-            value: True para congelar, False para retomar movimento.
+            value: True to freeze, False to resume movement.
         """
         self._frozen_ghosts = value
         self._cheat_used = True
 
     def set_invincible(self, value: bool) -> None:
-        """Ativa ou desativa a invencibilidade do Pacman.
+        """Toggle Pacman invincibility.
 
         Args:
-            value: True para invencível, False para normal.
+            value: True to enable, False to disable.
         """
         self._invincible = value
         self._cheat_used = True
 
     def add_lives(self, count: int = 1) -> None:
-        """Adiciona 1 vida ao jogador."""
+        """Add lives to the player."""
         self._pacman.lives += count
         self._cheat_used = True
 
     def skip_level(self) -> None:
-        """Salta 1 nível se ainda for possível."""
+        """Skip to the next level, or trigger WIN if on the last one."""
         self._cheat_used = True
         if self._level >= len(self._config.levels):
             self._status = GameStatus.WIN
@@ -240,11 +240,10 @@ class PacmanGame:
             self._load_level()
 
     def go_back_level(self) -> None:
-        """Volta 1 nível se ainda for possível."""
+        """Go back one level if possible."""
         if self._level > 1:
             self._level -= 1
             self._load_level()
             self._cheat_used = True
 
-        # COMENTÁRIO PARA O PEDRO --> INVALIDAR HIGH SCORE
-        # QUANDO ALGUMA CHEAT FOR ATIVADA
+        # highscore should be invalidated when any cheat is used
