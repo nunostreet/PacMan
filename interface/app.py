@@ -22,8 +22,21 @@ class AppStatus(Enum):
 
 
 class APP:
+    """Controlador principal da aplicação que executa o loop do jogo Pac-Man.
+
+    Possui a janela do pygame e gere as transições entre ecrãs
+    (menu, jogo, pausa, highscores, game over e vitória) com base
+    no ``AppStatus`` atual.
+    """
 
     def __init__(self, game: PacmanGame, config: GameConfig):
+        """Inicializa o pygame e cria todos os ecrãs usados pela aplicação.
+
+        Args:
+            game: A instância do motor do jogo Pac-Man que gere o jogo.
+            config: Valores de configuração usados para montar o jogo e
+                os seus ecrãs.
+        """
         pygame.init()
         self.game = game
         self.config = config
@@ -46,7 +59,12 @@ class APP:
         self.app_status = AppStatus.MENU
 
     def run_game(self):
+        """Executa o loop principal da aplicação até que esta seja fechada.
 
+        Desenha repetidamente o ecrã correspondente ao ``AppStatus``
+        atual, processa os eventos de input e avança o estado do jogo,
+        até que ``self.run`` se torne ``False``.
+        """
         self.highscores.load()
         while self.run:
 
@@ -127,7 +145,10 @@ class APP:
                                 self.game.skip_level()
                             if event.key == pygame.K_b:
                                 self.game.go_back_level()
-                            if event.key == pygame.K_PLUS or event.key == pygame.K_KP_PLUS:
+                            if event.key in (
+                                pygame.K_PLUS,
+                                pygame.K_KP_PLUS,
+                            ):
                                 self.game.add_lives()
 
                 if maze.status == GameStatus.GAME_OVER:
