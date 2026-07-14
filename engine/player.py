@@ -20,6 +20,8 @@ class Pacman:
         """
         self.x = start_x
         self.y = start_y
+        self.prev_x = start_x
+        self.prev_y = start_y
         self.lives = lives
 
     def move(
@@ -46,6 +48,7 @@ class Pacman:
             next_cell = (self.x + 1, self.y)
 
         if next_cell in neighbors[(self.x, self.y)]:
+            self.prev_x, self.prev_y = self.x, self.y
             self.x, self.y = next_cell
             return True
         return False
@@ -60,3 +63,5 @@ class Pacman:
         self.lives -= 1
         self.x = start_x
         self.y = start_y
+        self.prev_x = start_x
+        self.prev_y = start_y
