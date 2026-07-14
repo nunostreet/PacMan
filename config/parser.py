@@ -77,7 +77,9 @@ class Parser:
             with open(file, "r") as f:
                 return f.read()
         except FileNotFoundError:
-            raise Exception("File not found")
+            raise Exception(f"File not found: {file}")
+        except PermissionError:
+            raise Exception(f"Permission denied: {file}")
 
     def format_file(self, file: str) -> str:
         """Strip comment lines (starting with '#') from the file contents.
@@ -107,10 +109,25 @@ class Parser:
             Exception: If the string is not valid JSON.
         """
         try:
-            fields: dict[str, Any] = json.loads(file)
-            return fields
+            data: Any = json.loads(file)
         except json.JSONDecodeError as e:
             raise Exception(f"Invalid JSON syntax: {e}")
+        if not isinstance(data, dict):
+            raise Exception("Config file must be a JSON object, not an array")
+        fields: dict[str, Any] = data
+        return fields
+
+    @staticmethod
+    def _clamp(
+            value: Any,
+            t: type | tuple[type, ...],
+            min_val: Any,
+            default: Any
+            ) -> Any:
+        """Return value if it matches type t and >= min_val, else default."""
+        if not isinstance(value, t) or value < min_val:
+            return default
+        return value
 
     def parse_keys(self, file: dict[str, Any]) -> dict[str, Any]:
         """Merge the provided config with defaults and validate each field.
@@ -124,52 +141,51 @@ class Parser:
             A dictionary with all required keys present and validated.
         """
         result: dict[str, Any] = {**self.DEFAULTS, **file}
+        D = self.DEFAULTS
 
         if not isinstance(result["highscore_filename"], str) or \
                 not result["highscore_filename"].endswith(".json"):
-            result["highscore_filename"] = self.DEFAULTS["highscore_filename"]
+            result["highscore_filename"] = D["highscore_filename"]
 
-        if not isinstance(result["lives"], int) or result["lives"] < 1:
-            result["lives"] = self.DEFAULTS["lives"]
+        result["lives"] = self._clamp(result["lives"], int, 1, D["lives"])
+        result["seed"] = self._clamp(result["seed"], int, 1, D["seed"])
+        result["level_max_time"] = self._clamp(
+            result["level_max_time"], int, 1, D["level_max_time"]
+        )
+        result["pacgum"] = self._clamp(result["pacgum"], int, 1, D["pacgum"])
+        result["points_per_pacgum"] = self._clamp(
+            result["points_per_pacgum"], int, 1, D["points_per_pacgum"]
+        )
+        result["points_per_super_pacgum"] = self._clamp(
+            result["points_per_super_pacgum"],
+            int, 1, D["points_per_super_pacgum"]
+        )
+        result["points_per_ghost"] = self._clamp(
+            result["points_per_ghost"], int, 1, D["points_per_ghost"]
+        )
+        result["ghost_respawn_time"] = float(self._clamp(
+            result["ghost_respawn_time"], (int, float), 1,
+            D["ghost_respawn_time"]
+        ))
+        result["ghost_flee_time"] = float(self._clamp(
+            result["ghost_flee_time"], (int, float), 1, D["ghost_flee_time"]
+        ))
+
+        if not isinstance(result["levels"], list) or \
+                len(result["levels"]) < 1:
+            result["levels"] = D["levels"]
 
         for i, level in enumerate(result["levels"]):
-            if i < len(self.DEFAULTS["levels"]):
-                if not isinstance(level["width"], int) or level["width"] < 1:
-                    level["width"] = self.DEFAULTS["levels"][i]["width"]
-                if not isinstance(level["height"], int) or level["height"] < 1:
-                    level["height"] = self.DEFAULTS["levels"][i]["height"]
-
-        if not isinstance(result["pacgum"], int) or \
-                result["pacgum"] < 1:
-            result["pacgum"] = self.DEFAULTS["pacgum"]
-
-        if not isinstance(result["points_per_pacgum"], int) or \
-                result["points_per_pacgum"] < 1:
-            result["points_per_pacgum"] = self.DEFAULTS["points_per_pacgum"]
-
-        if not isinstance(result["points_per_super_pacgum"], int) or \
-                result["points_per_super_pacgum"] < 1:
-            result["points_per_super_pacgum"] = \
-                self.DEFAULTS["points_per_super_pacgum"]
-
-        if not isinstance(result["points_per_ghost"], int) or \
-                result["points_per_ghost"] < 1:
-            result["points_per_ghost"] = self.DEFAULTS["points_per_ghost"]
-
-        if not isinstance(result["seed"], int) or result["seed"] < 1:
-            result["seed"] = self.DEFAULTS["seed"]
-
-        if not isinstance(result["level_max_time"], int) or \
-                result["level_max_time"] < 1:
-            result["level_max_time"] = self.DEFAULTS["level_max_time"]
-
-        if not isinstance(result["ghost_respawn_time"], float) or \
-                result["ghost_respawn_time"] < 1:
-            result["ghost_respawn_time"] = self.DEFAULTS["ghost_respawn_time"]
-
-        if not isinstance(result["ghost_flee_time"], float) or \
-                result["ghost_flee_time"] < 1:
-            result["ghost_flee_time"] = self.DEFAULTS["ghost_flee_time"]
+            fallback = D["levels"][min(i, len(D["levels"]) - 1)]
+            if not isinstance(level, dict):
+                result["levels"][i] = fallback
+                continue
+            level["width"] = self._clamp(
+                level.get("width"), int, 1, fallback["width"]
+            )
+            level["height"] = self._clamp(
+                level.get("height"), int, 1, fallback["height"]
+            )
 
         return result
 

@@ -97,9 +97,11 @@ class GameScreen:
         Returns:
             A (cell_height, cell_width) tuple in pixels.
         """
-        CELL_H = (
-            self.HEIGHT - self.HUD_HEIGHT - self.PADDING_BOTTOM - self.PADDING_TOP
-        ) / len(grid)
+        available_h = (
+            self.HEIGHT - self.HUD_HEIGHT
+            - self.PADDING_BOTTOM - self.PADDING_TOP
+        )
+        CELL_H = available_h / len(grid)
         CELL_W = (self.WIDTH - self.PADDING_WIDTH) / len(grid[0])
         return CELL_H, CELL_W
 
@@ -187,7 +189,9 @@ class GameScreen:
             self.prev_pacman_pos[0] * CELL_W
             + (self.PADDING_WIDTH / 2) + (CELL_W / 2)
         )
-        prev_y = self.prev_pacman_pos[1] * CELL_H + (CELL_H/2) + self.PADDING_TOP
+        prev_y = (
+            self.prev_pacman_pos[1] * CELL_H + (CELL_H/2) + self.PADDING_TOP
+        )
         curr_x = pacman_pos[0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
         curr_y = pacman_pos[1] * CELL_H + (CELL_H/2) + self.PADDING_TOP
 
@@ -240,7 +244,10 @@ class GameScreen:
                     self.prev_ghost_pos[i][0] * CELL_W
                     + (self.PADDING_WIDTH / 2) + (CELL_W / 2)
                 )
-                prev_y = self.prev_ghost_pos[i][1] * CELL_H + (CELL_H/2) + self.PADDING_TOP
+                prev_y = (
+                    self.prev_ghost_pos[i][1] * CELL_H
+                    + (CELL_H/2) + self.PADDING_TOP
+                )
                 curr_x = ghost.x * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
                 curr_y = ghost.y * CELL_H + (CELL_H/2) + self.PADDING_TOP
 
