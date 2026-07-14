@@ -6,7 +6,7 @@ install:
 	python3 -m venv venv
 	$(PIP) install --upgrade pip
 	$(PIP) install mazegenerator-00001-py3-none-any.whl
-	$(PIP) install flake8 mypy pytest
+	$(PIP) install pygame flake8 mypy pytest
 
 run:
 	$(PYTHON) pac-man.py $(CONFIG)
