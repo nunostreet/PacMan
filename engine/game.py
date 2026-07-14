@@ -54,12 +54,14 @@ class PacmanGame:
         ]
         self._score = 0
         self._level = 1
+        self._update_speed()
         self._time_remaining = float(config.level_max_time)
         self._status = GameStatus.PLAYING
         self._frozen_ghosts = False
         self._invincible = False
         self._cheat_used = False
         self._pacman_timer: float = 0.0
+        self._pacman_penalty: float = 0.0
         self._respawn_timer: float = 0.0
         self._ghost_timer: float = 0.0
         self._pacman_interval: float = 0.25
@@ -74,6 +76,7 @@ class PacmanGame:
         self._scatter_durations: list[float] = [
             7.0, 20.0, 7.0, 20.0, 5.0, 20.0, 5.0
         ]
+        self._update_speed()
 
     def tick(self, direction: Direction | None, dt: float) -> GameSnapshot:
         """Advance the game state by one frame.
@@ -91,8 +94,11 @@ class PacmanGame:
             return self._build_snapshot()
 
         self._time_remaining -= dt
-        self._pacman_timer += dt
         self._ghost_timer += dt
+        if self._pacman_penalty > 0:
+            self._pacman_penalty = max(0.0, self._pacman_penalty - dt)
+        else:
+            self._pacman_timer += dt
 
         # check if pacman is dead
         if self._respawn_timer > 0:
@@ -125,6 +131,7 @@ class PacmanGame:
             if cell == 1:
                 self._score += self._config.points_per_pacgum
                 self._maze.pacgums[py][px] = 0
+                self._pacman_penalty += 0.017
             if cell == 2:
                 self._score += self._config.points_per_super_pacgum
                 self._maze.pacgums[py][px] = 0
@@ -236,6 +243,20 @@ class PacmanGame:
         ]
         self._time_remaining = float(self._config.level_max_time)
         self._status = GameStatus.PLAYING
+        self._update_speed()
+
+    def _update_speed(self) -> None:
+        base_pacman = 0.25
+        base_ghosts = 0.30
+        if self._level >= 5:
+            self._pacman_interval = base_pacman
+            self._ghost_interval = base_ghosts
+        elif 1 < self._level < 5:
+            self._pacman_interval = base_pacman / 0.9
+            self._ghost_interval = base_ghosts / 0.85
+        else:
+            self._pacman_interval = base_pacman / 0.8
+            self._ghost_interval = base_ghosts / 0.75
 
     # ----- CHEAT MODE ------
 
