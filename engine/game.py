@@ -60,11 +60,20 @@ class PacmanGame:
         self._invincible = False
         self._cheat_used = False
         self._pacman_timer: float = 0.0
+        self._respawn_timer: float = 0.0
         self._ghost_timer: float = 0.0
         self._pacman_interval: float = 0.25
         self._ghost_interval: float = 0.30
         self._ghost_flee_interval: float = 0.45
         self._active_ghost_interval: float = self._ghost_interval
+        self._scatter_mode: bool = True
+        self._scatter_timer: float = 7.0
+        self._scatter_phase: int = 0
+        # durations alternating scatter / chase
+        # https://pacman.holenet.info/#Chapter_4
+        self._scatter_durations: list[float] = [
+            7.0, 20.0, 7.0, 20.0, 5.0, 20.0, 5.0
+        ]
 
     def tick(self, direction: Direction | None, dt: float) -> GameSnapshot:
         """Advance the game state by one frame.
@@ -84,6 +93,10 @@ class PacmanGame:
         self._time_remaining -= dt
         self._pacman_timer += dt
         self._ghost_timer += dt
+
+        # check if pacman is dead
+        if self._respawn_timer > 0:
+            self._respawn_timer = max(0.0, self._respawn_timer - dt)
 
         # only move when the accumulator hits the interval
         pacman_can_move = self._pacman_timer >= self._pacman_interval
@@ -118,13 +131,26 @@ class PacmanGame:
                 # super-pacgum: all ghosts enter flee mode
                 for ghost in self._ghosts:
                     ghost.edible = True
-                    ghost.flee_timer = float(self._config.ghost_respawn_time)
+                    ghost.flee_timer = self._config.ghost_flee_time
+
+        if not any(g.edible for g in self._ghosts):
+            self._scatter_timer -= dt
+            if self._scatter_timer <= 0:
+                self._scatter_phase += 1
+                if self._scatter_phase < len(self._scatter_durations):
+                    self._scatter_timer = (
+                        self._scatter_durations[self._scatter_phase]
+                    )
+                    self._scatter_mode = self._scatter_phase % 2 == 0
+                else:
+                    self._scatter_mode = False
+                    self._scatter_timer = float('inf')
 
         for ghost in self._ghosts:
             if self._frozen_ghosts:
                 continue
             if ghosts_can_move:
-                ghost.move(self._maze.neighbors, (px, py))
+                ghost.move(self._maze.neighbors, (px, py), self._scatter_mode)
             ghost.update(dt)
 
         # collision: ghost active in the same cell as Pacman
@@ -132,6 +158,7 @@ class PacmanGame:
             if (
                 mid_cell
                 and ghost.respawn_timer <= 0
+                and self._respawn_timer <= 0
                 and (px, py) == (ghost.x, ghost.y)
             ):
                 if ghost.edible:
@@ -146,6 +173,7 @@ class PacmanGame:
                         self._pacman.respawn(
                             self._width // 2, self._height // 2
                         )
+                        self._respawn_timer = 2.0
                         # update px, py to avoid double collision in same frame
                         px, py = self._pacman.x, self._pacman.y
 

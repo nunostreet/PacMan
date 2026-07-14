@@ -23,6 +23,7 @@ class Parser:
         "points_per_super_pacgum": 50,
         "points_per_ghost": 200,
         "ghost_respawn_time": 5.0,
+        "ghost_flee_time": 7.0,
         "levels": [
             {"width": 15, "height": 11},
             {"width": 17, "height": 13},
@@ -166,6 +167,10 @@ class Parser:
                 result["ghost_respawn_time"] < 1:
             result["ghost_respawn_time"] = self.DEFAULTS["ghost_respawn_time"]
 
+        if not isinstance(result["ghost_flee_time"], float) or \
+                result["ghost_flee_time"] < 1:
+            result["ghost_flee_time"] = self.DEFAULTS["ghost_flee_time"]
+
         return result
 
     def to_game_config(self, result: dict[str, Any]) -> GameConfig:
@@ -190,6 +195,7 @@ class Parser:
             points_per_super_pacgum=result["points_per_super_pacgum"],
             points_per_ghost=result["points_per_ghost"],
             ghost_respawn_time=result["ghost_respawn_time"],
+            ghost_flee_time=result["ghost_flee_time"],
             level_max_time=result["level_max_time"],
             seed=result["seed"],
             highscore_filename=result["highscore_filename"],

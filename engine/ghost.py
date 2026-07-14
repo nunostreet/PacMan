@@ -35,7 +35,8 @@ class Ghost:
     def move(
             self,
             neighbors: dict[tuple[int, int], list[tuple[int, int]]],
-            pacman_pos: tuple[int, int]
+            pacman_pos: tuple[int, int],
+            scatter: bool = False,
             ) -> None:
         """Move the ghost one cell based on current mode.
 
@@ -67,10 +68,11 @@ class Ghost:
                 )
         else:
             # greedy: pick the open neighbour closest to Pacman
+            target = (self.start_x, self.start_y) if scatter else pacman_pos
             self.x, self.y = min(
                 valid,
                 key=lambda p: (
-                    abs(p[0] - pacman_pos[0]) + abs(p[1] - pacman_pos[1])
+                    abs(p[0] - target[0]) + abs(p[1] - target[1])
                 )
             )
         self._prev = old_pos
