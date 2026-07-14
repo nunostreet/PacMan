@@ -53,6 +53,7 @@ class GameConfig:
         points_per_super_pacgum: Points awarded for eating a super-pacgum.
         points_per_ghost: Points awarded for eating a ghost.
         ghost_respawn_time: Seconds before an eaten ghost comes back.
+        ghost_flee_time: Seconds ghosts stay edible after a super-pacgum.
         level_max_time: Time limit per level in seconds.
         seed: Maze seed for level 1 (subsequent levels use seed=0).
         highscore_filename: Path to the highscores JSON file.
@@ -68,6 +69,7 @@ class GameConfig:
     points_per_super_pacgum: int = 50
     points_per_ghost: int = 200
     ghost_respawn_time: float = 5.0
+    ghost_flee_time: float = 7.0
     level_max_time: int = 90
     seed: int = 42
     highscore_filename: str = "highscores.json"
