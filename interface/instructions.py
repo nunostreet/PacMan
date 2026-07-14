@@ -16,7 +16,7 @@ class Instructions(InterfaceScreen):
         super().__init__(win, width, height)
         self.lines = [
             "CONTROLS",
-            "W/A/S/D or Arrows - Move",
+            "W/A/S/D - Move",
             "ESC - Pause",
             "",
             "CHEATS",
@@ -24,7 +24,7 @@ class Instructions(InterfaceScreen):
             "F - Freeze Ghosts",
             "L - Skip Level",
             "B - Go Back Level",
-            "+ - Add Life",
+            "M - Add Life",
             "",
             "Press ESC to go back",
         ]

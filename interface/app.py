@@ -158,10 +158,7 @@ class APP:
                                 self.game.skip_level()
                             if ev.key == pygame.K_b:
                                 self.game.go_back_level()
-                            if ev.key in (
-                                pygame.K_PLUS,
-                                pygame.K_KP_PLUS,
-                            ):
+                            if ev.key == pygame.K_m:
                                 self.game.add_lives()
 
                 if maze.status == GameStatus.GAME_OVER:

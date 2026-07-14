@@ -41,6 +41,7 @@ class GameScreen:
         ]
         self.prev_pacman_alpha: float = 0.0
         self.prev_ghost_alpha: float = 0.0
+        self._maze_color = 'blue'
 
     def _load_sprites(self) -> None:
         """Load Pac-Man, ghost, and HUD images from disk."""
@@ -124,24 +125,24 @@ class GameScreen:
 
                 if (grid[i][j] & 1):
                     pygame.draw.line(
-                        self.WIN, 'white', (x, y), (x + CELL_W, y), 1
+                        self.WIN, self._maze_color, (x, y), (x + CELL_W, y), 3
                     )
 
                 if (grid[i][j] & 2):
                     pygame.draw.line(
-                        self.WIN, 'white',
-                        (x + CELL_W, y), (x + CELL_W, y + CELL_H), 1
+                        self.WIN, self._maze_color,
+                        (x + CELL_W, y), (x + CELL_W, y + CELL_H), 3
                     )
 
                 if (grid[i][j] & 4):
                     pygame.draw.line(
-                        self.WIN, 'white',
-                        (x, y + CELL_H), (x + CELL_W, y + CELL_H), 1
+                        self.WIN, self._maze_color,
+                        (x, y + CELL_H), (x + CELL_W, y + CELL_H), 3
                     )
 
                 if (grid[i][j] & 8):
                     pygame.draw.line(
-                        self.WIN, 'white', (x, y), (x, y + CELL_H), 1
+                        self.WIN, self._maze_color, (x, y), (x, y + CELL_H), 3
                     )
 
     def draw_pacman(
@@ -299,9 +300,9 @@ class GameScreen:
                 if pacgums[i][j] == 0:
                     continue
                 if pacgums[i][j] == 1:
-                    pygame.draw.circle(self.WIN, 'pink', (x, y), 2)
+                    pygame.draw.circle(self.WIN, 'pink', (x, y), 3)
                 if pacgums[i][j] == 2:
-                    pygame.draw.circle(self.WIN, 'pink', (x, y), 6)
+                    pygame.draw.circle(self.WIN, 'pink', (x, y), 7)
 
     def draw_hud(self, snapshot: GameSnapshot) -> None:
         """Draw the HUD: score, lives, level, and timer.
@@ -315,7 +316,7 @@ class GameScreen:
         # left: score, then lives icons right after it
         score = self.font.render(f"Score: {snapshot.score}", True, 'white')
         self.WIN.blit(score, (10, y))
-        lives_x = 10 + score.get_width() + 20
+        lives_x = 30 + score.get_width() + 20
         for i in range(snapshot.lives):
             icon = pygame.transform.scale(self.life_icon, (20, 20))
             self.WIN.blit(icon, (lives_x + i * 30, y - 6))
