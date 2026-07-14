@@ -25,6 +25,7 @@ class GameScreen:
             "assets/fonts/PressStart2P-Regular.ttf", 12
         )
         self.HUD_HEIGHT = 40
+        self.PADDING_TOP = 20
         self.PADDING_BOTTOM = 20
         self.PADDING_WIDTH = 20
         self.frame = 0
@@ -97,7 +98,7 @@ class GameScreen:
             A (cell_height, cell_width) tuple in pixels.
         """
         CELL_H = (
-            self.HEIGHT - self.HUD_HEIGHT - self.PADDING_BOTTOM
+            self.HEIGHT - self.HUD_HEIGHT - self.PADDING_BOTTOM - self.PADDING_TOP
         ) / len(grid)
         CELL_W = (self.WIDTH - self.PADDING_WIDTH) / len(grid[0])
         return CELL_H, CELL_W
@@ -113,7 +114,7 @@ class GameScreen:
         """
         CELL_H, CELL_W = self.calculate_cell(grid)
         for i in range(len(grid)):
-            y = i * CELL_H
+            y = i * CELL_H + self.PADDING_TOP
             for j in range(len(grid[i])):
                 x = j * CELL_W + self.PADDING_WIDTH/2
                 cell_color = (0, 0, 139) if grid[i][j] == 15 else 'black'
@@ -186,9 +187,9 @@ class GameScreen:
             self.prev_pacman_pos[0] * CELL_W
             + (self.PADDING_WIDTH / 2) + (CELL_W / 2)
         )
-        prev_y = self.prev_pacman_pos[1] * CELL_H + (CELL_H/2)
+        prev_y = self.prev_pacman_pos[1] * CELL_H + (CELL_H/2) + self.PADDING_TOP
         curr_x = pacman_pos[0] * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
-        curr_y = pacman_pos[1] * CELL_H + (CELL_H/2)
+        curr_y = pacman_pos[1] * CELL_H + (CELL_H/2) + self.PADDING_TOP
 
         x = prev_x + (curr_x - prev_x) * move_alpha
         y = prev_y + (curr_y - prev_y) * move_alpha
@@ -239,9 +240,9 @@ class GameScreen:
                     self.prev_ghost_pos[i][0] * CELL_W
                     + (self.PADDING_WIDTH / 2) + (CELL_W / 2)
                 )
-                prev_y = self.prev_ghost_pos[i][1] * CELL_H + (CELL_H/2)
+                prev_y = self.prev_ghost_pos[i][1] * CELL_H + (CELL_H/2) + self.PADDING_TOP
                 curr_x = ghost.x * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
-                curr_y = ghost.y * CELL_H + (CELL_H/2)
+                curr_y = ghost.y * CELL_H + (CELL_H/2) + self.PADDING_TOP
 
                 x = prev_x + (curr_x - prev_x) * move_alpha
                 y = prev_y + (curr_y - prev_y) * move_alpha
@@ -285,15 +286,15 @@ class GameScreen:
         CELL_H, CELL_W = self.calculate_cell(grid)
         pacgums = snapshot.pacgums
         for i in range(len(pacgums)):
-            y = i * CELL_H + (CELL_H/2)
+            y = i * CELL_H + (CELL_H/2) + self.PADDING_TOP
             for j in range(len(pacgums[i])):
                 x = j * CELL_W + (self.PADDING_WIDTH/2) + (CELL_W/2)
                 if pacgums[i][j] == 0:
                     continue
                 if pacgums[i][j] == 1:
-                    pygame.draw.circle(self.WIN, 'white', (x, y), 2)
+                    pygame.draw.circle(self.WIN, 'pink', (x, y), 2)
                 if pacgums[i][j] == 2:
-                    pygame.draw.circle(self.WIN, 'white', (x, y), 4)
+                    pygame.draw.circle(self.WIN, 'pink', (x, y), 6)
 
     def draw_hud(self, snapshot: GameSnapshot) -> None:
         """Draw the HUD: score, lives, level, and timer.

@@ -280,7 +280,7 @@ class PacmanGame:
 
     def add_lives(self, count: int = 1) -> None:
         """Add lives to the player."""
-        self._pacman.lives += count
+        self._pacman.lives = min(self._pacman.lives + count, 7)
         self._cheat_used = True
 
     def skip_level(self) -> None:
