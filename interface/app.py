@@ -13,7 +13,7 @@ from contracts import GameConfig
 
 
 class AppStatus(Enum):
-    """Estado atual da app."""
+    """Current application state."""
 
     MENU = "MENU"
     GAME = "GAME"
