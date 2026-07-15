@@ -128,6 +128,11 @@ class GameScreen:
         self.ghost_edible = pygame.image.load(
             get_asset_path("assets/pacman-art/ghosts/blue_ghost.png")
         )
+        # white variant: same shape as blue ghost but all pixels become white
+        self.ghost_flash = self.ghost_edible.copy()
+        self.ghost_flash.fill(
+            (255, 255, 255), special_flags=pygame.BLEND_RGB_MAX
+        )
         self.life_icon = pygame.image.load(
             get_asset_path("assets/pacman-art/other/apple.png")
         )

@@ -2,11 +2,16 @@ PYTHON = venv/bin/python3
 PIP = venv/bin/pip
 CONFIG = config/config.json
 
+PYTHON_BIN := $(shell for v in python3.12 python3.11 python3.10; do command -v $$v >/dev/null 2>&1 && echo $$v && break; done)
+
 install:
-	python3.12 -m venv venv
+ifeq ($(PYTHON_BIN),)
+	$(error No Python 3.10+ interpreter found (checked python3.12, python3.11, python3.10))
+endif
+	$(PYTHON_BIN) -m venv venv
 	$(PIP) install --upgrade pip
 	$(PIP) install mazegenerator-00001-py3-none-any.whl
-	$(PIP) install pygame flake8 mypy pytest
+	$(PIP) install pygame flake8 mypy pytest pyinstaller
 
 run:
 	$(PYTHON) pac-man.py $(CONFIG)

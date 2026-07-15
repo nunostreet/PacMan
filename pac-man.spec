@@ -1,11 +1,14 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
+import mazegenerator
 
+mazegenerator_path = os.path.dirname(mazegenerator.__file__)
 
 a = Analysis(
     ['pac-man.py'],
     pathex=[],
     binaries=[],
-    datas=[('assets', 'assets'), ('config/config.json', 'config'), ('venv/lib/python3.12/site-packages/mazegenerator', 'mazegenerator')],
+    datas=[('assets', 'assets'), ('config/config.json', 'config'), (mazegenerator_path, 'mazegenerator')],
     hiddenimports=['mazegenerator'],
     hookspath=[],
     hooksconfig={},
