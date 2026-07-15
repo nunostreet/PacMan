@@ -31,11 +31,12 @@ You can modify the following values:
     lives                   - Number of starting lives (default: 3)
     seed                    - Maze seed for level 1 (default: 42)
     level_max_time          - Time limit per level in seconds (default: 90)
-    pacgum_count            - Number of pacgums per level (default: 10)
+    pacgum                  - Number of pacgums per level (default: 10)
     points_per_pacgum       - Points per pacgum eaten (default: 10)
     points_per_super_pacgum - Points per super-pacgum eaten (default: 50)
     points_per_ghost        - Points per ghost eaten (default: 200)
     ghost_respawn_time      - Seconds for ghost to respawn after being eaten (default: 5.0)
+    ghost_flee_time         - Seconds ghosts stay edible after a super-pacgum (default: 7.0)
     levels                  - List of maze sizes [(width, height), ...]
 
 Comments starting with # are supported in the config file.
