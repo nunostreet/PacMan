@@ -115,7 +115,7 @@ The key architectural decision was a strict **Model-View separation**: the engin
 | Player movement | WASD keys | Player moves through corridors, cannot cross walls |
 | Pacgum collection | Walk over dots | Score +10 per pacgum, dots disappear |
 | Super-pacgum | Walk over corner dot | Score +50, all ghosts enter flee mode |
-| Ghost flee duration | Eat super-pacgum | Ghosts return to chase after ~5 seconds |
+| Ghost flee duration | Eat super-pacgum | Ghosts return to chase after ~7 seconds |
 | Eat ghost | Touch edible ghost | Score +200, ghost respawns at corner after delay |
 | Lose life | Touch non-edible ghost | Life counter decreases, player respawns in centre |
 | Game over | Lose all lives | Game over screen with final score |
@@ -126,7 +126,8 @@ The key architectural decision was a strict **Model-View separation**: the engin
 | Cheat — invincible | Activate invincible | Ghosts cannot kill player; highscore invalidated |
 | Cheat — freeze ghosts | Activate freeze | Ghosts stop moving; highscore invalidated |
 | Cheat — level skip | Activate skip | Advances to next level; highscore invalidated |
-| Cheat — extra life | Activate add life | Life counter increases; highscore invalidated |
+| Cheat — extra life | Activate add life (M) | Life counter increases up to max 7; highscore invalidated |
+| Cheat — go back level | Activate go back (B) | Returns to previous level; highscore invalidated |
 | Lint | `make lint` | No flake8 or mypy errors |
 | Tests | `make test` | All tests pass |
 
