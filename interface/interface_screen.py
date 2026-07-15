@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 import pygame
+import sys
+import os
 
 
 class InterfaceScreen(ABC):
@@ -21,9 +23,12 @@ class InterfaceScreen(ABC):
         self.WIN = win
         self.WIDTH = width
         self.HEIGHT = height
-        self.font = pygame.font.Font(
-            "assets/fonts/PressStart2P-Regular.ttf", 12
-        )
+        if hasattr(sys, '_MEIPASS'):
+            font_path = os.path.join(sys._MEIPASS, 'assets', 'fonts',
+                                     'PressStart2P-Regular.ttf')
+        else:
+            font_path = 'assets/fonts/PressStart2P-Regular.ttf'
+        self.font = pygame.font.Font(font_path, 12)
         self.HUD_HEIGHT = 40
         self.PADDING_BOTTOM = 20
         self.PADDING_WIDTH = 20

@@ -1,5 +1,7 @@
 import pygame
 import json
+import os
+import sys
 
 
 class Highscores:
@@ -20,9 +22,12 @@ class Highscores:
         self.WIN = win
         self.WIDTH = width
         self.HEIGHT = height
-        self.font = pygame.font.Font(
-            "assets/fonts/PressStart2P-Regular.ttf", 12
-        )
+        if hasattr(sys, '_MEIPASS'):
+            font_path = os.path.join(sys._MEIPASS, 'assets', 'fonts',
+                                     'PressStart2P-Regular.ttf')
+        else:
+            font_path = 'assets/fonts/PressStart2P-Regular.ttf'
+        self.font = pygame.font.Font(font_path, 12)
         self.top_players: list[dict] = []
 
     def load(self) -> None:
