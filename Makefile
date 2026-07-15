@@ -27,4 +27,7 @@ lint:
 test:
 	venv/bin/pytest tests/
 
-.PHONY: install run debug clean lint test
+package:
+	bash packager.sh
+
+.PHONY: install run debug clean lint test package
