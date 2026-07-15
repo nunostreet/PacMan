@@ -26,7 +26,7 @@ clean:
 	find . -name "*.pyc" -delete
 
 lint:
-	venv/bin/flake8 . --exclude=venv,venv 2,.git,__pycache__,.mypy_cache --max-line-length=79
+	venv/bin/flake8 . --exclude=venv,.git,__pycache__,.mypy_cache --max-line-length=79
 	venv/bin/mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 test:
