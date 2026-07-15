@@ -17,4 +17,5 @@ vendor/
 subject.pdf
 .DS_Store
 
-project_management/
+tests/
+conftest.py

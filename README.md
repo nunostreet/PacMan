@@ -8,6 +8,9 @@ A fully playable Pac-Man clone written in Python using pygame. The game features
 
 ### Requirements
 
+- Python 3.12+
+- The `mazegenerator` wheel bundled in the repository root (installed automatically via `make install`)
+
 ### Installation
 
 ```bash
@@ -31,6 +34,35 @@ make debug
 ```bash
 make lint
 ```
+
+### Tests
+
+```bash
+make test
+```
+
+## How to play
+
+### Controls
+
+| Key | Action |
+|-----|--------|
+| `W` / `A` / `S` / `D` | Move up / left / down / right |
+| `Esc` | Pause / resume |
+
+Eat all the dots to complete the level. Avoid ghosts — unless you've just eaten a super-pacgum (large dot), which makes all ghosts edible for a few seconds. Surviving all 10 levels wins the game.
+
+### Cheat mode
+
+These keys work during gameplay. Using any cheat disables highscore saving for that run.
+
+| Key | Effect |
+|-----|--------|
+| `I` | Toggle invincibility (ghosts can't kill you) |
+| `F` | Freeze / unfreeze all ghosts |
+| `L` | Skip to the next level |
+| `B` | Go back to the previous level |
+| `M` | Add one life (max 7) |
 
 ## Configuration
 
