@@ -1,6 +1,6 @@
 import sys
 import json
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar
 
 from contracts import GameConfig
 
@@ -217,7 +217,7 @@ class Parser:
             highscore_filename=result["highscore_filename"],
         )
 
-    def run_parsing(self) -> Optional[GameConfig]:
+    def run_parsing(self, config_path: str | None = None) -> None | GameConfig:
         """Run the full parsing pipeline and return the resulting GameConfig.
 
         Validates arguments, reads and parses the config file, applies
@@ -227,15 +227,18 @@ class Parser:
             A GameConfig on success, or None if arguments are invalid or an
             error occurs during parsing.
         """
-        if not self.parse_arguments():
-            return None
+        if config_path is None:
+            if not self.parse_arguments():
+                return None
+            config_path = self.get_file()
+
         try:
-            file: str = self.get_file()
-            raw: str = self.open_file(file)
-            formatted: str = self.format_file(raw)
-            fields: dict[str, Any] = self.read_file(formatted)
-            keys: dict[str, Any] = self.parse_keys(fields)
-            return self.to_game_config(keys)
+            result = self.open_file(config_path)
+            new_result = self.format_file(result)
+            end_file = self.read_file(new_result)
+            keys = self.parse_keys(end_file)
+            config = self.to_game_config(keys)
+            return config
         except Exception as e:
             print(e)
-            return None
+        return None
