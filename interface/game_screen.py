@@ -4,6 +4,20 @@ import sys
 import os
 
 
+def get_asset_path(relative_path: str) -> str:
+    """Fix an asset path, compatible with PyInstaller.
+
+    Args:
+        relative_path: Relative Path of asset.
+
+    Returns:
+        Absolute Path.
+    """
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return relative_path
+
+
 class GameScreen:
     """Draws a single game frame onto a pygame window.
 
@@ -23,12 +37,9 @@ class GameScreen:
         self.WIN = win
         self.WIDTH = width
         self.HEIGHT = height
-        if hasattr(sys, '_MEIPASS'):
-            font_path = os.path.join(sys._MEIPASS, 'assets', 'fonts',
-                                     'PressStart2P-Regular.ttf')
-        else:
-            font_path = 'assets/fonts/PressStart2P-Regular.ttf'
-        self.font = pygame.font.Font(font_path, 12)
+        self.font = pygame.font.Font(
+            get_asset_path("assets/fonts/PressStart2P-Regular.ttf"), 12
+        )
         self.HUD_HEIGHT = 40
         self.PADDING_TOP = 20
         self.PADDING_BOTTOM = 20
@@ -49,26 +60,50 @@ class GameScreen:
         self._maze_color = 'blue'
 
     def _load_sprites(self) -> None:
-        """Load Pac-Man, ghost, and HUD images from disk."""
+        """Carrega do disco as imagens do Pac-Man, fantasmas e HUD."""
         self.pacman_right = [
-            pygame.image.load("assets/pacman-art/pacman-right/1.png"),
-            pygame.image.load("assets/pacman-art/pacman-right/2.png"),
-            pygame.image.load("assets/pacman-art/pacman-right/3.png"),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-right/1.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-right/2.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-right/3.png")
+            ),
         ]
         self.pacman_left = [
-            pygame.image.load("assets/pacman-art/pacman-left/1.png"),
-            pygame.image.load("assets/pacman-art/pacman-left/2.png"),
-            pygame.image.load("assets/pacman-art/pacman-left/3.png"),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-left/1.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-left/2.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-left/3.png")
+            ),
         ]
         self.pacman_up = [
-            pygame.image.load("assets/pacman-art/pacman-up/1.png"),
-            pygame.image.load("assets/pacman-art/pacman-up/2.png"),
-            pygame.image.load("assets/pacman-art/pacman-up/3.png"),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-up/1.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-up/2.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-up/3.png")
+            ),
         ]
         self.pacman_down = [
-            pygame.image.load("assets/pacman-art/pacman-down/1.png"),
-            pygame.image.load("assets/pacman-art/pacman-down/2.png"),
-            pygame.image.load("assets/pacman-art/pacman-down/3.png"),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-down/1.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-down/2.png")
+            ),
+            pygame.image.load(
+                get_asset_path("assets/pacman-art/pacman-down/3.png")
+            ),
         ]
         self.pacman_sprites = {
             Direction.RIGHT: self.pacman_right,
@@ -77,21 +112,24 @@ class GameScreen:
             Direction.DOWN: self.pacman_down,
         }
         self.ghost_sprites = {
-            0: pygame.image.load("assets/pacman-art/ghosts/blinky.png"),
-            1: pygame.image.load("assets/pacman-art/ghosts/pinky.png"),
-            2: pygame.image.load("assets/pacman-art/ghosts/inky.png"),
-            3: pygame.image.load("assets/pacman-art/ghosts/clyde.png"),
+            0: pygame.image.load(
+                get_asset_path("assets/pacman-art/ghosts/blinky.png")
+            ),
+            1: pygame.image.load(
+                get_asset_path("assets/pacman-art/ghosts/pinky.png")
+            ),
+            2: pygame.image.load(
+                get_asset_path("assets/pacman-art/ghosts/inky.png")
+            ),
+            3: pygame.image.load(
+                get_asset_path("assets/pacman-art/ghosts/clyde.png")
+            ),
         }
         self.ghost_edible = pygame.image.load(
-            "assets/pacman-art/ghosts/blue_ghost.png"
-        )
-        # white variant: same shape as blue ghost but all pixels become white
-        self.ghost_flash = self.ghost_edible.copy()
-        self.ghost_flash.fill(
-            (255, 255, 255), special_flags=pygame.BLEND_RGB_MAX
+            get_asset_path("assets/pacman-art/ghosts/blue_ghost.png")
         )
         self.life_icon = pygame.image.load(
-            "assets/pacman-art/other/apple.png"
+            get_asset_path("assets/pacman-art/other/apple.png")
         )
 
     def calculate_cell(self, grid: list[list[int]]) -> tuple[float, float]:

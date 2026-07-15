@@ -5,6 +5,20 @@ import sys
 import os
 
 
+def get_asset_path(relative_path: str) -> str:
+    """Fix an asset path, compatible with PyInstaller.
+
+    Args:
+        relative_path: Relative Path of asset.
+
+    Returns:
+        Absolute Path.
+    """
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return relative_path
+
+
 class InterfaceScreen(ABC):
     """Abstract base for menu-style screens drawn outside the game loop.
 
@@ -23,12 +37,9 @@ class InterfaceScreen(ABC):
         self.WIN = win
         self.WIDTH = width
         self.HEIGHT = height
-        if hasattr(sys, '_MEIPASS'):
-            font_path = os.path.join(sys._MEIPASS, 'assets', 'fonts',
-                                     'PressStart2P-Regular.ttf')
-        else:
-            font_path = 'assets/fonts/PressStart2P-Regular.ttf'
-        self.font = pygame.font.Font(font_path, 12)
+        self.font = pygame.font.Font(
+            get_asset_path("assets/fonts/PressStart2P-Regular.ttf"), 12
+        )
         self.HUD_HEIGHT = 40
         self.PADDING_BOTTOM = 20
         self.PADDING_WIDTH = 20

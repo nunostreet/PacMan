@@ -4,6 +4,20 @@ import os
 import sys
 
 
+def get_asset_path(relative_path: str) -> str:
+    """Fix an asset path, compatible with PyInstaller.
+
+    Args:
+        relative_path: Relative Path of asset.
+
+    Returns:
+        Absolute Path.
+    """
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return relative_path
+
+
 class Highscores:
     """Loads, updates, persists, and draws the top-10 list."""
 
@@ -22,12 +36,9 @@ class Highscores:
         self.WIN = win
         self.WIDTH = width
         self.HEIGHT = height
-        if hasattr(sys, '_MEIPASS'):
-            font_path = os.path.join(sys._MEIPASS, 'assets', 'fonts',
-                                     'PressStart2P-Regular.ttf')
-        else:
-            font_path = 'assets/fonts/PressStart2P-Regular.ttf'
-        self.font = pygame.font.Font(font_path, 12)
+        self.font = pygame.font.Font(
+            get_asset_path("assets/fonts/PressStart2P-Regular.ttf"), 12
+        )
         self.top_players: list[dict] = []
 
     def load(self) -> None:
