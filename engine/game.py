@@ -124,7 +124,7 @@ class PacmanGame:
 
         px, py = self._pacman.x, self._pacman.y
         # only interact once Pacman is visually halfway into the cell
-        mid_cell = self._pacman_timer / self._pacman_interval >= 0.5
+        mid_cell = self._pacman_timer / self._pacman_interval >= 0.6
 
         if mid_cell:
             cell = self._maze.pacgums[py][px]
