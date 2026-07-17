@@ -17,3 +17,5 @@ subject.pdf
 
 tests/
 conftest.py
+
+highscores.json

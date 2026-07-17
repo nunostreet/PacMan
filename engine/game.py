@@ -45,7 +45,10 @@ class PacmanGame:
         self._height = height
         self._maze = MazeLoader()
         self._maze.load(width, height, config.seed, config.pacgum)
-        self._pacman = Pacman(width // 2, height // 2, config.lives)
+        cx, cy = width // 2, height // 2
+        while not self._maze.neighbors.get((cx, cy)):
+            cx += 1
+        self._pacman = Pacman(cx, cy, config.lives)
         self._ghosts = [
             Ghost(0, 0),
             Ghost(width - 1, 0),
@@ -177,9 +180,10 @@ class PacmanGame:
                     if self._pacman.lives <= 1:
                         self._status = GameStatus.GAME_OVER
                     else:
-                        self._pacman.respawn(
-                            self._width // 2, self._height // 2
-                        )
+                        cx, cy = self._width // 2, self._height // 2
+                        while not self._maze.neighbors.get((cx, cy)):
+                            cx += 1
+                        self._pacman.respawn(cx, cy)
                         self._respawn_timer = 2.0
                         # update px, py to avoid double collision in same frame
                         px, py = self._pacman.x, self._pacman.y
@@ -233,8 +237,11 @@ class PacmanGame:
         self._height = height
         seed = self._config.seed if self._level == 1 else 0
         self._maze.load(width, height, seed, self._config.pacgum)
-        self._pacman.x = width // 2
-        self._pacman.y = height // 2
+        cx, cy = width // 2, height // 2
+        while not self._maze.neighbors.get((cx, cy)):
+            cx += 1
+        self._pacman.x = cx
+        self._pacman.y = cy
         self._ghosts = [
             Ghost(0, 0),
             Ghost(width - 1, 0),
